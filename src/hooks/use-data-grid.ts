@@ -122,6 +122,9 @@ function useDataGrid<TData>({
   overscan = OVERSCAN,
   dir: dirProp,
   initialState,
+  manualSorting,
+  manualFiltering,
+  manualPagination,
   ...props
 }: UseDataGridProps<TData>) {
   const dir = useDirection(dirProp)
@@ -1960,9 +1963,12 @@ function useDataGrid<TData>({
       onColumnFiltersChange,
       columnResizeMode: "onChange",
       columnResizeDirection: dir,
+      manualSorting,
+      manualFiltering,
+      manualPagination,
       getCoreRowModel: getMemoizedCoreRowModel,
-      getFilteredRowModel: getMemoizedFilteredRowModel,
-      getSortedRowModel: getMemoizedSortedRowModel,
+      ...(!manualFiltering && { getFilteredRowModel: getMemoizedFilteredRowModel }),
+      ...(!manualSorting && { getSortedRowModel: getMemoizedSortedRowModel }),
       meta: tableMeta
     }
   }, [
@@ -1975,6 +1981,9 @@ function useDataGrid<TData>({
     onRowSelectionChange,
     onSortingChange,
     onColumnFiltersChange,
+    manualSorting,
+    manualFiltering,
+    manualPagination,
     getMemoizedCoreRowModel,
     getMemoizedFilteredRowModel,
     getMemoizedSortedRowModel,

@@ -14,6 +14,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: "Data Table", path: "/", match: "exact" },
   { label: "Data Table Client", path: "/data-table-client", match: "startsWith" },
+  { label: "Data Grid", path: "/data-grid", match: "startsWith" },
   { label: "POS", path: "/pos", match: "startsWith" }
 ]
 

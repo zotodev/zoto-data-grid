@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { listTasks } from "@/queries/list-tasks"
 import { listAllTasks } from "./queries/list-all-tasks"
+import { listTasksCursor, type TaskGridParams } from "./queries/list-tasks-cursor"
 
 export const getTasksFn = createServerFn({ method: "GET" })
   .inputValidator(
@@ -29,3 +30,9 @@ export const getTasksFn = createServerFn({ method: "GET" })
 export const getTasksClientFn = createServerFn({ method: "GET" }).handler(async () => {
   return listAllTasks()
 })
+
+export const getTasksGridFn = createServerFn({ method: "GET" })
+  .inputValidator((data: TaskGridParams) => data)
+  .handler(async ({ data }) => {
+    return listTasksCursor(data)
+  })
