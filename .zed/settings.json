@@ -1,0 +1,50 @@
+{
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/routeTree.gen.ts"
+  ],
+  "format_on_save": "on",
+  "languages": {
+    "TypeScript": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
+    },
+    "JavaScript": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
+    },
+    "TSX": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
+    },
+    "JSON": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.organizeImports.biome": true
+      }
+    },
+    "JSONC": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.organizeImports.biome": true
+      }
+    }
+  }
+}
