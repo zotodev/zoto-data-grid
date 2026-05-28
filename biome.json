@@ -46,7 +46,8 @@
     "rules": {
       "a11y": {
         "noSvgWithoutTitle": "off",
-        "useGenericFontNames": "off"
+        "useGenericFontNames": "off",
+        "useSemanticElements": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",

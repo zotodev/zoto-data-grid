@@ -99,9 +99,9 @@ export function DataTableFilterSlider<TData>({ column, title }: DataTableFilterS
   )
 
   const onSliderValueChange = React.useCallback(
-    (value: RangeValue) => {
+    (value: number | readonly number[]) => {
       if (Array.isArray(value) && value.length === 2) {
-        column.setFilterValue(value)
+        column.setFilterValue([value[0], value[1]])
       }
     },
     [column]
