@@ -2,7 +2,7 @@
 
 import { useDirection } from "@radix-ui/react-direction";
 import type { Table } from "@tanstack/react-table";
-import { Check, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,8 +47,10 @@ export function DataGridViewMenu<TData>({
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button aria-label="Toggle columns" role="combobox" dir={dir} variant="outline" size="sm" className="ms-auto hidden h-8 font-normal lg:flex" disabled={disabled} />}><Settings2 className="text-muted-foreground" />View
-                  </PopoverTrigger>
+      <PopoverTrigger render={<Button aria-label="Toggle columns" role="combobox" dir={dir} variant="outline" size="sm" className="hidden h-8 font-normal lg:flex" disabled={disabled} />}>
+        <Settings2 className="text-muted-foreground" />
+        View
+      </PopoverTrigger>
       <PopoverContent
         dir={dir}
         className={cn("w-44 p-0", className)}
@@ -62,6 +64,7 @@ export function DataGridViewMenu<TData>({
               {columns.map((column) => (
                 <CommandItem
                   key={column.id}
+                  data-checked={column.getIsVisible() || undefined}
                   onSelect={() =>
                     column.toggleVisibility(!column.getIsVisible())
                   }
@@ -69,12 +72,6 @@ export function DataGridViewMenu<TData>({
                   <span className="truncate">
                     {column.columnDef.meta?.label ?? column.id}
                   </span>
-                  <Check
-                    className={cn(
-                      "ms-auto size-4 shrink-0",
-                      column.getIsVisible() ? "opacity-100" : "opacity-0",
-                    )}
-                  />
                 </CommandItem>
               ))}
             </CommandGroup>

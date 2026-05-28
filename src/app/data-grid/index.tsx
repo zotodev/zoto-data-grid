@@ -139,8 +139,8 @@ function RouteComponent() {
         <DataGridFilterMenu table={grid.table} />
         <DataGridSortMenu table={grid.table} />
         <DataGridRowHeightMenu table={grid.table} />
-        <DataGridViewMenu table={grid.table} />
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <DataGridViewMenu table={grid.table} />
           <DataGridKeyboardShortcuts enableSearch enablePaste />
         </div>
       </div>
