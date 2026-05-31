@@ -120,7 +120,7 @@ export function DataGrid<TData>({
           role="rowgroup"
           data-slot="grid-header"
           ref={headerRef}
-          className="sticky top-0 z-10 grid border-b bg-background"
+          className="sticky top-0 z-10 grid border-b bg-sidebar"
         >
           {table.getHeaderGroups().map((headerGroup, rowIndex) => (
             <div
@@ -173,7 +173,11 @@ export function DataGrid<TData>({
                         showStartBorder && header.column.id !== "select",
                     })}
                     style={{
-                      ...getColumnPinningStyle({ column: header.column, dir }),
+                      ...getColumnPinningStyle({
+                        column: header.column,
+                        dir,
+                        background: "var(--sidebar)",
+                      }),
                       width: `calc(var(--header-${header.id}-size) * 1px)`,
                     }}
                   >

@@ -134,8 +134,14 @@ export function getColumnPinningStyle<TData>(params: {
   column: Column<TData>;
   withBorder?: boolean;
   dir?: Direction;
+  background?: string;
 }): React.CSSProperties {
-  const { column, dir = "ltr", withBorder = false } = params;
+  const {
+    column,
+    dir = "ltr",
+    withBorder = false,
+    background = "var(--background)",
+  } = params;
 
   const isPinned = column.getIsPinned();
   const isLastLeftPinnedColumn =
@@ -166,7 +172,7 @@ export function getColumnPinningStyle<TData>(params: {
     right: isRtl ? leftPosition : rightPosition,
     opacity: isPinned ? 0.97 : 1,
     position: isPinned ? "sticky" : "relative",
-    background: isPinned ? "var(--background)" : "var(--background)",
+    background,
     width: column.getSize(),
     zIndex: isPinned ? 1 : undefined,
   };
