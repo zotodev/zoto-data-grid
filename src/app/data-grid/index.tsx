@@ -5,7 +5,6 @@ import * as React from "react"
 import { DataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterToolbar } from "@/components/data-grid/data-grid-filter-toolbar"
 import { DataGridKeyboardShortcuts } from "@/components/data-grid/data-grid-keyboard-shortcuts"
-import { DataGridRowHeightMenu } from "@/components/data-grid/data-grid-row-height-menu"
 import {
   DataGridSkeleton,
   DataGridSkeletonGrid,
@@ -122,9 +121,8 @@ function RouteComponent() {
       {/* <h1 className="mb-6 shrink-0 font-bold text-2xl">Data Grid</h1> */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <DataGridFilterToolbar table={grid.table} />
-        <DataGridSortMenu table={grid.table} />
-        <DataGridRowHeightMenu table={grid.table} />
         <div className="ml-auto flex items-center gap-2">
+          <DataGridSortMenu table={grid.table} />
           <DataGridViewMenu table={grid.table} />
           <DataGridKeyboardShortcuts enableSearch enablePaste />
         </div>
