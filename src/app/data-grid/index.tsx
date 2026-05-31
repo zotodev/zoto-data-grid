@@ -17,6 +17,7 @@ import { arrIncludesSome, dateFilter } from "@/components/data-table/client/filt
 import type { Task } from "@/db/types"
 import { getTasksGridFn } from "@/functions"
 import { useDataGrid } from "@/hooks/use-data-grid"
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { getColumns } from "./-components/columns"
 
@@ -88,6 +89,22 @@ function RouteComponent() {
     }
   })
 
+  const { rowVirtualizer, ...dataGrid } = grid
+  const rows = dataGrid.table.getRowModel().rows
+  const onFetchNextPage = React.useCallback(() => {
+    fetchNextPage()
+  }, [fetchNextPage])
+
+  useInfiniteScroll<HTMLDivElement>({
+    scrollRef: dataGrid.dataGridRef,
+    rowVirtualizer,
+    rowCount: rows.length,
+    hasNextPage: Boolean(hasNextPage),
+    isFetchingNextPage,
+    fetchNextPage: onFetchNextPage,
+    threshold: 50
+  })
+
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col overflow-hidden p-6">
@@ -112,13 +129,7 @@ function RouteComponent() {
           <DataGridKeyboardShortcuts enableSearch enablePaste />
         </div>
       </div>
-      <DataGrid
-        {...grid}
-        height={height}
-        onLoadMore={fetchNextPage}
-        hasNextPage={hasNextPage}
-        isLoadingMore={isFetchingNextPage}
-      />
+      <DataGrid {...dataGrid} height={height} />
     </div>
   )
 }

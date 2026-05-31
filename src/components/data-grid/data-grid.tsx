@@ -18,7 +18,7 @@ import type { Direction } from "@/types/data-grid";
 const EMPTY_CELL_SELECTION_SET = new Set<string>();
 
 interface DataGridProps<TData>
-  extends Omit<ReturnType<typeof useDataGrid<TData>>, "dir">,
+  extends Omit<ReturnType<typeof useDataGrid<TData>>, "dir" | "rowVirtualizer">,
     Omit<React.ComponentProps<"div">, "contextMenu"> {
   dir?: Direction;
   height?: number;
