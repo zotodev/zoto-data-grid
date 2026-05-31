@@ -1,7 +1,7 @@
 import type { SortingState } from "@tanstack/react-table"
 import { and, eq, gt, lt, or, type SQL } from "drizzle-orm"
 import type { CellOpts } from "@/types/data-grid"
-import type { DrizzleColumnMap, VariantMap } from "./drizzle"
+import { type DrizzleColumnMap, normalizeVariant, type VariantMap } from "./drizzle"
 
 function coerceForCompare(value: unknown, variant: CellOpts["variant"]): unknown {
   if (variant === "date") {
@@ -57,7 +57,7 @@ export function buildKeysetWhere(
       const col = columnMap[s.id]
       if (!col) return null
       const variant = variantByColumn[s.id] ?? "short-text"
-      const value = coerceForCompare(decoded[s.id], variant)
+      const value = coerceForCompare(decoded[s.id], normalizeVariant(variant))
       if (value === undefined) return null
       return { col, desc: !!s.desc, value }
     })

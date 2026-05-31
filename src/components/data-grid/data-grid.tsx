@@ -1,13 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import * as React from "react";
 import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-header";
 import { DataGridContextMenu } from "@/components/data-grid/data-grid-context-menu";
 import { DataGridPasteDialog } from "@/components/data-grid/data-grid-paste-dialog";
 import { DataGridRow } from "@/components/data-grid/data-grid-row";
 import { DataGridSearch } from "@/components/data-grid/data-grid-search";
-import { useAsRef } from "@/hooks/use-as-ref";
 import type { useDataGrid } from "@/hooks/use-data-grid";
 import {
   flexRender,
@@ -25,6 +23,9 @@ interface DataGridProps<TData>
   dir?: Direction;
   height?: number;
   stretchColumns?: boolean;
+  onLoadMore?: () => void;
+  hasNextPage?: boolean;
+  isLoadingMore?: boolean;
 }
 
 export function DataGrid<TData>({
@@ -49,10 +50,13 @@ export function DataGrid<TData>({
   rowHeight,
   contextMenu,
   pasteDialog,
-  onRowAdd: onRowAddProp,
   height = 600,
   stretchColumns = false,
   adjustLayout = false,
+  onRowAdd: _onRowAdd,
+  onLoadMore,
+  hasNextPage = false,
+  isLoadingMore = false,
   className,
   ...props
 }: DataGridProps<TData>) {
@@ -61,15 +65,6 @@ export function DataGrid<TData>({
   const columnVisibility = table.getState().columnVisibility;
   const columnPinning = table.getState().columnPinning;
 
-  const onRowAddRef = useAsRef(onRowAddProp);
-
-  const onRowAdd = React.useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      onRowAddRef.current?.(event);
-    },
-    [onRowAddRef],
-  );
-
   const onDataGridContextMenu = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       event.preventDefault();
@@ -77,16 +72,19 @@ export function DataGrid<TData>({
     [],
   );
 
-  const onFooterCellKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!onRowAddRef.current) return;
+  const onLoadMoreClick = React.useCallback(() => {
+    if (!hasNextPage || isLoadingMore) return;
+    onLoadMore?.();
+  }, [hasNextPage, isLoadingMore, onLoadMore]);
 
+  const onLoadMoreKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        onRowAddRef.current();
+        onLoadMoreClick();
       }
     },
-    [onRowAddRef],
+    [onLoadMoreClick],
   );
 
   return (
@@ -106,7 +104,7 @@ export function DataGrid<TData>({
       <div
         role="grid"
         aria-label="Data grid"
-        aria-rowcount={rows.length + (onRowAddProp ? 1 : 0)}
+        aria-rowcount={rows.length + (onLoadMore && hasNextPage ? 1 : 0)}
         aria-colcount={columns.length}
         data-slot="grid"
         tabIndex={0}
@@ -242,7 +240,7 @@ export function DataGrid<TData>({
             );
           })}
         </div>
-        {!readOnly && onRowAdd && (
+        {onLoadMore && hasNextPage && (
           <div
             role="rowgroup"
             data-slot="grid-footer"
@@ -252,24 +250,29 @@ export function DataGrid<TData>({
             <div
               role="row"
               aria-rowindex={rows.length + 2}
-              data-slot="grid-add-row"
+              data-slot="grid-load-more-row"
               tabIndex={-1}
               className="flex w-full"
             >
               <div
                 role="gridcell"
                 tabIndex={0}
-                className="relative flex h-9 grow items-center bg-muted/30 transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none"
+                aria-disabled={isLoadingMore}
+                className={cn(
+                  "relative flex h-9 grow items-center justify-center bg-muted/30 transition-colors focus:outline-none",
+                  isLoadingMore
+                    ? "cursor-default"
+                    : "cursor-pointer hover:bg-muted/50 focus:bg-muted/50",
+                )}
                 style={{
                   width: table.getTotalSize(),
                   minWidth: table.getTotalSize(),
                 }}
-                onClick={onRowAdd}
-                onKeyDown={onFooterCellKeyDown}
+                onClick={onLoadMoreClick}
+                onKeyDown={onLoadMoreKeyDown}
               >
-                <div className="sticky start-0 flex items-center gap-2 px-3 text-muted-foreground">
-                  <Plus className="size-3.5" />
-                  <span className="text-sm">Add row</span>
+                <div className="sticky start-0 flex items-center gap-2 px-3 font-medium text-muted-foreground text-sm">
+                  {isLoadingMore ? "Loading…" : "Load more"}
                 </div>
               </div>
             </div>

@@ -2,6 +2,18 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { getDataGridSelectColumn } from "@/components/data-grid/data-grid-select-column"
 import type { Task } from "@/db/types"
 
+const statusOptions = [
+  { label: "Todo", value: "TODO" },
+  { label: "In Progress", value: "IN_PROGRESS" },
+  { label: "Done", value: "DONE" }
+]
+
+const priorityOptions = [
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" }
+]
+
 export function getColumns(): ColumnDef<Task>[] {
   return [
     getDataGridSelectColumn<Task>({ enableRowMarkers: true }),
@@ -10,8 +22,13 @@ export function getColumns(): ColumnDef<Task>[] {
       accessorKey: "title",
       header: "Title",
       size: 250,
+      enableColumnFilter: true,
       meta: {
         label: "Title",
+        filter: {
+          variant: "text",
+          placeholder: "Filter title..."
+        },
         cell: { variant: "short-text" }
       }
     },
@@ -30,15 +47,16 @@ export function getColumns(): ColumnDef<Task>[] {
       accessorKey: "status",
       header: "Status",
       size: 150,
+      enableColumnFilter: true,
       meta: {
         label: "Status",
+        filter: {
+          variant: "multiSelect",
+          options: statusOptions
+        },
         cell: {
           variant: "select",
-          options: [
-            { label: "Todo", value: "TODO" },
-            { label: "In Progress", value: "IN_PROGRESS" },
-            { label: "Done", value: "DONE" }
-          ]
+          options: statusOptions
         }
       }
     },
@@ -57,15 +75,16 @@ export function getColumns(): ColumnDef<Task>[] {
       accessorKey: "priority",
       header: "Priority",
       size: 150,
+      enableColumnFilter: true,
       meta: {
         label: "Priority",
+        filter: {
+          variant: "select",
+          options: priorityOptions
+        },
         cell: {
           variant: "select",
-          options: [
-            { label: "Low", value: "low" },
-            { label: "Medium", value: "medium" },
-            { label: "High", value: "high" }
-          ]
+          options: priorityOptions
         }
       }
     },
@@ -84,8 +103,12 @@ export function getColumns(): ColumnDef<Task>[] {
       accessorKey: "dueDate",
       header: "Due Date",
       size: 150,
+      enableColumnFilter: true,
       meta: {
         label: "Due Date",
+        filter: {
+          variant: "date"
+        },
         cell: { variant: "date" }
       }
     },
