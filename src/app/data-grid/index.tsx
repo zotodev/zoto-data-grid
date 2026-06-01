@@ -103,7 +103,7 @@ function RouteComponent() {
     hasNextPage: Boolean(hasNextPage),
     isFetchingNextPage,
     fetchNextPage: onFetchNextPage,
-    threshold: 50
+    threshold: 5
   })
 
   if (isLoading) {

@@ -18,13 +18,13 @@ interface UseInfiniteScrollProps<
   isFetchingNextPage: boolean;
   /** Function to fetch the next page */
   fetchNextPage: () => void;
-  /** Number of rows from the end to trigger loading (default: 20) */
+  /** Number of rendered row indexes from the end to trigger loading (default: 20 rows) */
   threshold?: number;
 }
 
 /**
  * Hook for infinite scroll with virtualization
- * Automatically fetches next page when scrolling near the bottom
+ * Automatically fetches next page when scrolling within the row threshold near the bottom
  */
 export function useInfiniteScroll<
   TScrollElement extends HTMLElement = HTMLElement,
