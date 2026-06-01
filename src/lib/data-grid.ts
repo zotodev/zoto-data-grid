@@ -393,6 +393,8 @@ export function getColumnVariant(variant?: CellOpts["variant"]): {
       return { label: "Short text", icon: BaselineIcon };
     case "long-text":
       return { label: "Long text", icon: TextInitialIcon };
+    case "primary-name":
+      return { label: "Primary name", icon: BaselineIcon };
     case "number":
       return { label: "Number", icon: HashIcon };
     case "url":

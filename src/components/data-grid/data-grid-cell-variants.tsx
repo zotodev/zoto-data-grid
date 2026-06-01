@@ -208,6 +208,84 @@ export function ShortTextCell<TData>({
   );
 }
 
+export const primaryNameCellClassName =
+  "block size-full truncate text-start font-medium text-orange-600 underline decoration-orange-600/40 underline-offset-2 hover:text-orange-700 hover:decoration-orange-700/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-600/50 dark:text-orange-400 dark:hover:text-orange-300";
+
+export function PrimaryNameCell<TData>({
+  cell,
+  tableMeta,
+  rowIndex,
+  columnId,
+  rowHeight,
+  isFocused,
+  isEditing,
+  isSelected,
+  isSearchMatch,
+  isActiveSearchMatch,
+  readOnly,
+}: DataGridCellProps<TData>) {
+  const value = (cell.getValue() as string | null | undefined) ?? "";
+  const onPrimaryNameClick = cell.column.columnDef.meta?.onPrimaryNameClick;
+
+  const triggerAction = React.useCallback(
+    (event: React.MouseEvent | React.KeyboardEvent) => {
+      if (!onPrimaryNameClick) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      onPrimaryNameClick({
+        row: cell.row.original,
+        rowIndex,
+        columnId,
+        event,
+      });
+    },
+    [onPrimaryNameClick, cell.row.original, rowIndex, columnId],
+  );
+
+  const onWrapperKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!isFocused || !onPrimaryNameClick) return;
+
+      if (event.key === "Enter" || event.key === " ") {
+        triggerAction(event);
+      }
+    },
+    [isFocused, onPrimaryNameClick, triggerAction],
+  );
+
+  return (
+    <DataGridCellWrapper<TData>
+      cell={cell}
+      tableMeta={tableMeta}
+      rowIndex={rowIndex}
+      columnId={columnId}
+      rowHeight={rowHeight}
+      isEditing={isEditing}
+      isFocused={isFocused}
+      isSelected={isSelected}
+      isSearchMatch={isSearchMatch}
+      isActiveSearchMatch={isActiveSearchMatch}
+      readOnly={readOnly}
+      onKeyDown={onWrapperKeyDown}
+    >
+      <button
+        type="button"
+        data-slot="grid-cell-content"
+        disabled={!value || !onPrimaryNameClick}
+        onClick={triggerAction}
+        className={cn(primaryNameCellClassName, {
+          "cursor-pointer": Boolean(value && onPrimaryNameClick),
+          "cursor-default text-muted-foreground no-underline":
+            !value || !onPrimaryNameClick,
+        })}
+      >
+        {value || "—"}
+      </button>
+    </DataGridCellWrapper>
+  );
+}
+
 export function LongTextCell<TData>({
   cell,
   tableMeta,

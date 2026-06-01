@@ -9,6 +9,7 @@ import {
   LongTextCell,
   MultiSelectCell,
   NumberCell,
+  PrimaryNameCell,
   SelectCell,
   ShortTextCell,
   UrlCell,
@@ -69,6 +70,9 @@ function DataGridCellImpl<TData>({
       break;
     case "long-text":
       Comp = LongTextCell;
+      break;
+    case "primary-name":
+      Comp = PrimaryNameCell;
       break;
     case "number":
       Comp = NumberCell;

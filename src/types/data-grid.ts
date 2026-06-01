@@ -19,6 +19,9 @@ export type CellOpts =
       variant: "long-text";
     }
   | {
+      variant: "primary-name";
+    }
+  | {
       variant: "number";
       min?: number;
       max?: number;
@@ -60,6 +63,12 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
     label?: string;
     cell?: CellOpts;
+    onPrimaryNameClick?: (params: {
+      row: TData;
+      rowIndex: number;
+      columnId: string;
+      event: React.MouseEvent | React.KeyboardEvent;
+    }) => void;
   }
 
   // biome-ignore lint/correctness/noUnusedVariables: TData is used in the TableMeta interface

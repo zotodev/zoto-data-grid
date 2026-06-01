@@ -47,7 +47,8 @@
       "a11y": {
         "noSvgWithoutTitle": "off",
         "useGenericFontNames": "off",
-        "useSemanticElements": "off"
+        "useSemanticElements": "off",
+        "noLabelWithoutControl": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",

@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
+import { toast } from "sonner"
 import { getDataGridSelectColumn } from "@/components/data-grid/data-grid-select-column"
 import type { Task } from "@/db/types"
 
@@ -29,7 +30,12 @@ export function getColumns(): ColumnDef<Task>[] {
           variant: "text",
           placeholder: "Filter title..."
         },
-        cell: { variant: "short-text" }
+        cell: { variant: "primary-name" },
+        onPrimaryNameClick: ({ row }) => {
+          toast.info(row.title, {
+            description: row.description ?? undefined
+          })
+        }
       }
     },
     {

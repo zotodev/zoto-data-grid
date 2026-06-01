@@ -30,7 +30,9 @@ function RouteComponent() {
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "createdAt", desc: true }])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
+  // Track viewport size; 760 is the SSR/fallback height before the window is measured.
   const windowSize = useWindowSize({ defaultHeight: 760 })
+  // Fill remaining page space below the app header, toolbar, and padding (150px), with a 400px minimum.
   const height = Math.max(400, windowSize.height - 150)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
