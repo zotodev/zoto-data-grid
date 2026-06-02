@@ -26,8 +26,10 @@ export const Route = createFileRoute("/data-grid/")({
 
 const PAGE_SIZE = 50
 
+const DEFAULT_SORTING: SortingState = [{ id: "createdAt", desc: true }]
+
 function RouteComponent() {
-  const [sorting, setSorting] = React.useState<SortingState>([{ id: "createdAt", desc: true }])
+  const [sorting, setSorting] = React.useState<SortingState>(DEFAULT_SORTING)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
   // Track viewport size; 760 is the SSR/fallback height before the window is measured.
@@ -80,6 +82,7 @@ function RouteComponent() {
     enableSearch: true,
     enablePaste: true,
     initialState: {
+      sorting: DEFAULT_SORTING,
       columnPinning: {
         left: ["select"]
       },
@@ -92,6 +95,7 @@ function RouteComponent() {
 
   const { rowVirtualizer, ...dataGrid } = grid
   const rows = dataGrid.table.getRowModel().rows
+  const selectedCount = dataGrid.table.getSelectedRowModel().rows.length
   const onFetchNextPage = React.useCallback(() => {
     fetchNextPage()
   }, [fetchNextPage])
@@ -130,6 +134,10 @@ function RouteComponent() {
         </div>
       </div>
       <DataGrid {...dataGrid} height={height} />
+      <div className="mt-2 flex shrink-0 items-center gap-4 text-muted-foreground text-xs">
+        <span>Rows: {rows.length}</span>
+        <span>Selected: {selectedCount}</span>
+      </div>
     </div>
   )
 }
