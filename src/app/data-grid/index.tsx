@@ -18,6 +18,7 @@ import { getTasksGridFn } from "@/functions"
 import { useDataGrid } from "@/hooks/use-data-grid"
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useWindowSize } from "@/hooks/use-window-size"
+import { ActionsMenu } from "./-components/actions-menu"
 import { getColumns } from "./-components/columns"
 
 export const Route = createFileRoute("/data-grid/")({
@@ -128,6 +129,7 @@ function RouteComponent() {
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <DataGridFilterToolbar table={grid.table} />
         <div className="ml-auto flex items-center gap-2">
+          <ActionsMenu table={grid.table} />
           <DataGridSortMenu table={grid.table} />
           <DataGridViewMenu table={grid.table} />
           <DataGridKeyboardShortcuts enableSearch enablePaste />

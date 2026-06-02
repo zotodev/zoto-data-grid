@@ -17,7 +17,7 @@ const priorityOptions = [
 
 export function getColumns(): ColumnDef<Task>[] {
   return [
-    getDataGridSelectColumn<Task>({ enableRowMarkers: true }),
+    getDataGridSelectColumn<Task>(),
     {
       id: "title",
       accessorKey: "title",
