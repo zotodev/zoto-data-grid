@@ -82,6 +82,7 @@ function RouteComponent() {
     onColumnFiltersChange,
     enableSearch: true,
     enablePaste: true,
+    readOnly: true,
     initialState: {
       sorting: DEFAULT_SORTING,
       columnPinning: {
