@@ -5,14 +5,10 @@ import * as React from "react"
 import { DataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterToolbar } from "@/components/data-grid/data-grid-filter-toolbar"
 import { DataGridKeyboardShortcuts } from "@/components/data-grid/data-grid-keyboard-shortcuts"
-import {
-  DataGridSkeleton,
-  DataGridSkeletonGrid,
-  DataGridSkeletonToolbar
-} from "@/components/data-grid/data-grid-skeleton"
 import { DataGridSortMenu } from "@/components/data-grid/data-grid-sort-menu"
 import { DataGridViewMenu } from "@/components/data-grid/data-grid-view-menu"
 import { arrIncludesSome, dateFilter } from "@/components/data-table/client/filter-functions"
+import { Spinner } from "@/components/ui/spinner"
 import type { Task } from "@/db/types"
 import { getTasksGridFn } from "@/functions"
 import { useDataGrid } from "@/hooks/use-data-grid"
@@ -112,34 +108,22 @@ function RouteComponent() {
     threshold: 5
   })
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-1 flex-col overflow-hidden p-6">
-        <h1 className="mb-6 font-bold text-2xl">Data Grid</h1>
-        <DataGridSkeleton>
-          <DataGridSkeletonToolbar />
-          <DataGridSkeletonGrid />
-        </DataGridSkeleton>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-1 flex-col overflow-hidden p-6 pb-8">
-      {/* <h1 className="mb-6 shrink-0 font-bold text-2xl">Data Grid</h1> */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <DataGridFilterToolbar table={grid.table} />
         <div className="ml-auto flex items-center gap-2">
           <ActionsMenu table={grid.table} />
+          {(isLoading || isFetchingNextPage) && <Spinner className="size-3.5 text-muted-foreground" />}
           <DataGridSortMenu table={grid.table} />
           <DataGridViewMenu table={grid.table} />
           <DataGridKeyboardShortcuts enableSearch enablePaste />
         </div>
       </div>
-      <DataGrid {...dataGrid} height={height} />
-      <div className="mt-2 flex shrink-0 items-center gap-4 text-muted-foreground text-xs">
+      <DataGrid {...dataGrid} height={height} isLoading={isLoading} />
+      <div className="mt-2 flex shrink-0 items-center gap-4 text-muted-foreground text-sm">
         <span>Rows: {rows.length}</span>
-        <span>Selected: {selectedCount}</span>
+        {selectedCount > 0 && <span>Selected: {selectedCount}</span>}
       </div>
     </div>
   )

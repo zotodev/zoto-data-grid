@@ -6,6 +6,7 @@ import { DataGridContextMenu } from "@/components/data-grid/data-grid-context-me
 import { DataGridPasteDialog } from "@/components/data-grid/data-grid-paste-dialog"
 import { DataGridRow } from "@/components/data-grid/data-grid-row"
 import { DataGridSearch } from "@/components/data-grid/data-grid-search"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { useDataGrid } from "@/hooks/use-data-grid"
 import { flexRender, getColumnBorderVisibility, getColumnPinningStyle } from "@/lib/data-grid"
 import { cn } from "@/lib/utils"
@@ -22,6 +23,7 @@ interface DataGridProps<TData>
   onLoadMore?: () => void
   hasNextPage?: boolean
   isLoadingMore?: boolean
+  isLoading?: boolean
 }
 
 export function DataGrid<TData>({
@@ -53,6 +55,7 @@ export function DataGrid<TData>({
   onLoadMore,
   hasNextPage = false,
   isLoadingMore = false,
+  isLoading = false,
   className,
   ...props
 }: DataGridProps<TData>) {
@@ -176,43 +179,82 @@ export function DataGrid<TData>({
           role="rowgroup"
           data-slot="grid-body"
           className="relative grid"
-          style={{
-            height: `${virtualTotalSize}px`,
-            contain: adjustLayout ? "layout paint" : "strict"
-          }}
+          style={
+            isLoading
+              ? { height: `${height}px`, contain: "strict" }
+              : { height: `${virtualTotalSize}px`, contain: adjustLayout ? "layout paint" : "strict" }
+          }
         >
-          {virtualItems.map((virtualItem) => {
-            const row = rows[virtualItem.index]
-            if (!row) return null
+          {isLoading
+            ? table.getHeaderGroups().slice(0, 1).flatMap((headerGroup) =>
+                Array.from({ length: 20 }).map((_, rowIdx) => (
+                  <div
+                    key={rowIdx}
+                    role="row"
+                    tabIndex={-1}
+                    className="flex w-full border-b"
+                    style={{ height: 34, transform: `translateY(${rowIdx * 34}px)`, position: "absolute", width: "100%" }}
+                  >
+                    {headerGroup.headers.map((header, colIdx) => {
+                      const isLast = colIdx === headerGroup.headers.length - 1
+                      const isCheckbox = header.column.id === "select"
+                      return (
+                        <div
+                          key={header.id}
+                          role="gridcell"
+                          tabIndex={-1}
+                          className={cn("flex shrink-0 items-center px-3", !isLast && "border-e")}
+                          style={{
+                            ...getColumnPinningStyle({ column: header.column, dir, background: "var(--background)" }),
+                            width: `calc(var(--header-${header.id}-size) * 1px)`
+                          }}
+                        >
+                          {isCheckbox ? (
+                            <Skeleton className="h-3.5 w-3.5 rounded-sm" />
+                          ) : (
+                            <Skeleton
+                              className="h-3.5 rounded"
+                              style={{ width: `${55 + ((rowIdx * 13 + colIdx * 7) % 35)}%` }}
+                            />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))
+              )
+            : virtualItems.map((virtualItem) => {
+                const row = rows[virtualItem.index]
+                if (!row) return null
 
-            const cellSelectionKeys = cellSelectionMap?.get(virtualItem.index) ?? EMPTY_CELL_SELECTION_SET
+                const cellSelectionKeys = cellSelectionMap?.get(virtualItem.index) ?? EMPTY_CELL_SELECTION_SET
 
-            const searchMatchColumns = searchMatchesByRow?.get(virtualItem.index) ?? null
-            const isActiveSearchRow = activeSearchMatch?.rowIndex === virtualItem.index
+                const searchMatchColumns = searchMatchesByRow?.get(virtualItem.index) ?? null
+                const isActiveSearchRow = activeSearchMatch?.rowIndex === virtualItem.index
 
-            return (
-              <DataGridRow
-                key={row.id}
-                row={row}
-                tableMeta={tableMeta}
-                rowMapRef={rowMapRef}
-                virtualItem={virtualItem}
-                measureElement={measureElement}
-                rowHeight={rowHeight}
-                columnVisibility={columnVisibility}
-                columnPinning={columnPinning}
-                focusedCell={focusedCell}
-                editingCell={editingCell}
-                cellSelectionKeys={cellSelectionKeys}
-                searchMatchColumns={searchMatchColumns}
-                activeSearchMatch={isActiveSearchRow ? activeSearchMatch : null}
-                dir={dir}
-                adjustLayout={adjustLayout}
-                stretchColumns={stretchColumns}
-                readOnly={readOnly}
-              />
-            )
-          })}
+                return (
+                  <DataGridRow
+                    key={row.id}
+                    row={row}
+                    tableMeta={tableMeta}
+                    rowMapRef={rowMapRef}
+                    virtualItem={virtualItem}
+                    measureElement={measureElement}
+                    rowHeight={rowHeight}
+                    columnVisibility={columnVisibility}
+                    columnPinning={columnPinning}
+                    focusedCell={focusedCell}
+                    editingCell={editingCell}
+                    cellSelectionKeys={cellSelectionKeys}
+                    searchMatchColumns={searchMatchColumns}
+                    activeSearchMatch={isActiveSearchRow ? activeSearchMatch : null}
+                    dir={dir}
+                    adjustLayout={adjustLayout}
+                    stretchColumns={stretchColumns}
+                    readOnly={readOnly}
+                  />
+                )
+              })}
         </div>
         {onLoadMore && hasNextPage && (
           <div

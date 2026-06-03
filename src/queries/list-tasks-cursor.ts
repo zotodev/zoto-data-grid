@@ -52,7 +52,7 @@ const DEFAULT_SORT: SortingState = [{ id: "createdAt", desc: true }]
 export async function listTasksCursor(params: TaskGridParams = {}) {
   const { pageParam, pageSize = 50, sorting = [], filters = [] } = params
 
-  console.log("pageParam", JSON.stringify(params, null, 2))
+  // console.log("pageParam", JSON.stringify(params, null, 2))
 
   const effectiveSort = sorting.length > 0 ? sorting : DEFAULT_SORT
   const lastDesc = effectiveSort[effectiveSort.length - 1]?.desc ?? true
@@ -79,10 +79,7 @@ export async function listTasksCursor(params: TaskGridParams = {}) {
   const hasMore = rows.length > pageSize
   const pageRows = hasMore ? rows.slice(0, pageSize) : rows
   const last = pageRows[pageRows.length - 1]
-  const nextCursor =
-    hasMore && last
-      ? encodeCursor(buildCursorPayload(last as unknown as Record<string, unknown>, sortingWithId))
-      : undefined
+  const nextCursor = hasMore && last ? encodeCursor(buildCursorPayload(last, sortingWithId)) : undefined
 
   return { data: pageRows, nextCursor }
 }
