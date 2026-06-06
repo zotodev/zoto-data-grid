@@ -133,9 +133,7 @@ function RootDocument({ children }: { readonly children: React.ReactNode }) {
           }
         `}</style>
       </head>
-      <body
-        className={cn("flex h-dvh flex-col overflow-hidden overscroll-none whitespace-pre-line font-sans antialiased")}
-      >
+      <body className={cn("flex flex-col whitespace-pre-line font-sans antialiased")}>
         <Providers>
           <Header />
           <main className="flex flex-1 flex-col overflow-hidden">{children}</main>

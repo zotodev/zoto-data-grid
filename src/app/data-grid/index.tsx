@@ -32,7 +32,7 @@ function RouteComponent() {
   // Track viewport size; 760 is the SSR/fallback height before the window is measured.
   const windowSize = useWindowSize({ defaultHeight: 760 })
   // Fill remaining page space below the app header, toolbar, and padding (150px), with a 400px minimum.
-  const height = Math.max(400, windowSize.height - 150)
+  const height = Math.max(400, windowSize.height - 170)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
     queryKey: ["data-grid-tasks", sorting, columnFilters],
@@ -109,7 +109,7 @@ function RouteComponent() {
   })
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden p-6 pb-8">
+    <div className="flex flex-1 flex-col overflow-hidden p-6">
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <DataGridFilterToolbar table={grid.table} />
         <div className="ml-auto flex items-center gap-2">
