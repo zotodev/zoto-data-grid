@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
-import type { ColumnFiltersState, SortingState, Updater } from "@tanstack/react-table"
+import { createFileRoute, stripSearchParams } from "@tanstack/react-router"
 import * as React from "react"
 import { DataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterToolbar } from "@/components/data-grid/data-grid-filter-toolbar"
@@ -11,23 +10,34 @@ import { arrIncludesSome, dateFilter } from "@/components/data-table/client/filt
 import { Spinner } from "@/components/ui/spinner"
 import type { Task } from "@/db/types"
 import { getTasksGridFn } from "@/functions"
-import { useDataGrid } from "@/hooks/use-data-grid"
+import { useDataGridServer } from "@/hooks/use-data-grid-server"
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useWindowSize } from "@/hooks/use-window-size"
+import { DEFAULT_TASK_GRID_SORTING } from "@/lib/task-grid-params"
 import { ActionsMenu } from "./-components/actions-menu"
 import { getColumns } from "./-components/columns"
+import { dataGridSearchSchema, defaultDataGridSearch } from "./-lib/search"
 
 export const Route = createFileRoute("/data-grid/")({
+  validateSearch: dataGridSearchSchema,
+  search: {
+    middlewares: [stripSearchParams(defaultDataGridSearch)]
+  },
   component: RouteComponent
 })
 
 const PAGE_SIZE = 50
 
-const DEFAULT_SORTING: SortingState = [{ id: "createdAt", desc: true }]
-
 function RouteComponent() {
-  const [sorting, setSorting] = React.useState<SortingState>(DEFAULT_SORTING)
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const search = Route.useSearch()
+
+  const queryParams = {
+    sorting: search.sort,
+    q: search.title,
+    status: search.status,
+    priority: search.priority,
+    dueDate: search.dueDate
+  }
 
   // Track viewport size; 760 is the SSR/fallback height before the window is measured.
   const windowSize = useWindowSize({ defaultHeight: 760 })
@@ -35,17 +45,15 @@ function RouteComponent() {
   const height = Math.max(400, windowSize.height - 170)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ["data-grid-tasks", sorting, columnFilters],
-    queryFn: async ({ pageParam }) => {
-      return getTasksGridFn({
+    queryKey: ["data-grid-tasks", "infinite", queryParams],
+    queryFn: ({ pageParam }) =>
+      getTasksGridFn({
         data: {
-          pageParam: pageParam as string | undefined,
-          pageSize: PAGE_SIZE,
-          sorting,
-          filters: columnFilters
+          cursor: pageParam,
+          perPage: PAGE_SIZE,
+          ...queryParams
         }
-      })
-    },
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor
   })
@@ -56,31 +64,19 @@ function RouteComponent() {
 
   const columns = React.useMemo(() => getColumns(), [])
 
-  const onSortingChange = React.useCallback((updater: Updater<SortingState>) => {
-    setSorting(updater)
-  }, [])
-
-  const onColumnFiltersChange = React.useCallback((updater: Updater<ColumnFiltersState>) => {
-    setColumnFilters(updater)
-  }, [])
-
-  const grid = useDataGrid<Task>({
+  const grid = useDataGridServer<Task>({
     data: allData,
     columns,
+    search,
     filterFns: {
       arrIncludesSome,
       dateFilter
     },
-    manualSorting: true,
-    manualFiltering: true,
-    manualPagination: true,
-    onSortingChange,
-    onColumnFiltersChange,
     enableSearch: true,
     enablePaste: true,
     readOnly: true,
     initialState: {
-      sorting: DEFAULT_SORTING,
+      sorting: DEFAULT_TASK_GRID_SORTING,
       columnPinning: {
         left: ["select"]
       },
@@ -92,11 +88,14 @@ function RouteComponent() {
   })
 
   const { rowVirtualizer, ...dataGrid } = grid
+  const queryStateKey = JSON.stringify(queryParams)
+
+  React.useEffect(() => {
+    rowVirtualizer.scrollToOffset(0)
+  }, [queryStateKey, rowVirtualizer])
+
   const rows = dataGrid.table.getRowModel().rows
   const selectedCount = dataGrid.table.getSelectedRowModel().rows.length
-  const onFetchNextPage = React.useCallback(() => {
-    fetchNextPage()
-  }, [fetchNextPage])
 
   useInfiniteScroll<HTMLDivElement>({
     scrollRef: dataGrid.dataGridRef,
@@ -104,7 +103,7 @@ function RouteComponent() {
     rowCount: rows.length,
     hasNextPage: Boolean(hasNextPage),
     isFetchingNextPage,
-    fetchNextPage: onFetchNextPage,
+    fetchNextPage,
     threshold: 5
   })
 

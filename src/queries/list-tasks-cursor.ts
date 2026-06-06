@@ -1,20 +1,10 @@
-import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
-import { and, asc, desc, type SQL } from "drizzle-orm"
+import type { SortingState } from "@tanstack/react-table"
+import { and, asc, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm"
 import db from "@/db"
 import { tasks } from "@/db/schema"
-import {
-  buildCursorPayload,
-  buildDrizzleOrderBy,
-  buildDrizzleWhere,
-  buildKeysetWhere,
-  decodeCursor,
-  encodeCursor
-} from "@/lib/server-grid-filters"
+import { normalizeTaskGridSorting } from "@/lib/task-grid-params"
 
-// One place that says which columns can be filtered/sorted, what Drizzle column they map to,
-// and how to coerce their values. Point a key at any table's column to filter/sort across joins.
-const COLUMN_MAP = {
-  id: tasks.id,
+const sortableColumns = {
   title: tasks.title,
   description: tasks.description,
   status: tasks.status,
@@ -24,59 +14,67 @@ const COLUMN_MAP = {
   dueDate: tasks.dueDate,
   createdAt: tasks.createdAt,
   updatedAt: tasks.updatedAt
-}
-
-const VARIANTS = {
-  id: "short-text",
-  title: "text",
-  description: "long-text",
-  status: "multiSelect",
-  label: "short-text",
-  priority: "select",
-  assignee: "short-text",
-  dueDate: "date",
-  createdAt: "date",
-  updatedAt: "date"
 } as const
 
-const DEFAULT_SORT: SortingState = [{ id: "createdAt", desc: true }]
-
 export type TaskGridParams = {
-  pageParam?: string
-  pageSize?: number
+  cursor?: string
+  perPage?: number
   sorting?: SortingState
-  filters?: ColumnFiltersState
+  q?: string
+  status?: string
+  priority?: string
+  dueDate?: number
 }
 
 export async function listTasksCursor(params: TaskGridParams = {}) {
-  const { pageParam, pageSize = 50, sorting = [], filters = [] } = params
+  const { cursor, perPage = 50, q, priority, dueDate } = params
+  const sorting = normalizeTaskGridSorting(params.sorting)
+  const status = params.status?.split(",").filter(Boolean)
+  const conditions: SQL[] = []
 
-  const effectiveSort = sorting.length > 0 ? sorting : DEFAULT_SORT
-  const lastDesc = effectiveSort[effectiveSort.length - 1]?.desc ?? true
-  const sortingWithId = [...effectiveSort, { id: "id", desc: lastDesc }]
+  if (status?.length) {
+    conditions.push(status.length === 1 ? eq(tasks.status, status[0]) : inArray(tasks.status, status))
+  }
 
-  const filterWhere = buildDrizzleWhere(filters, COLUMN_MAP, VARIANTS)
+  if (priority) {
+    conditions.push(eq(tasks.priority, priority))
+  }
 
-  const decoded = pageParam ? decodeCursor(pageParam) : null
-  const keysetWhere = decoded ? buildKeysetWhere(decoded, sortingWithId, COLUMN_MAP, VARIANTS) : undefined
+  if (dueDate !== undefined) {
+    conditions.push(eq(tasks.dueDate, new Date(dueDate)))
+  }
 
-  const where: SQL | undefined =
-    filterWhere && keysetWhere ? and(filterWhere, keysetWhere) : (filterWhere ?? keysetWhere)
+  if (q) {
+    const search = or(
+      sql`${tasks.title} LIKE ${`%${q}%`} COLLATE NOCASE`,
+      sql`${tasks.label} LIKE ${`%${q}%`} COLLATE NOCASE`
+    )
+    if (search) conditions.push(search)
+  }
 
-  const orderBy = buildDrizzleOrderBy(effectiveSort, COLUMN_MAP)
-  const finalOrderBy = [...orderBy, lastDesc ? desc(tasks.id) : asc(tasks.id)]
+  const orderBy = sorting.flatMap((sort) => {
+    const column = sortableColumns[sort.id as keyof typeof sortableColumns]
+    return column ? [sort.desc ? desc(column) : asc(column)] : []
+  })
 
-  const rows = await db
+  const lastSortDescending = sorting[sorting.length - 1]?.desc ?? true
+  orderBy.push(lastSortDescending ? desc(tasks.id) : asc(tasks.id))
+
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0
+
+  const data = await db
     .select()
     .from(tasks)
-    .where(where)
-    .orderBy(...finalOrderBy)
-    .limit(pageSize + 1)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(...orderBy)
+    .limit(perPage)
+    .offset(Number.isNaN(offset) ? 0 : offset)
 
-  const hasMore = rows.length > pageSize
-  const pageRows = hasMore ? rows.slice(0, pageSize) : rows
-  const last = pageRows[pageRows.length - 1]
-  const nextCursor = hasMore && last ? encodeCursor(buildCursorPayload(last, sortingWithId)) : undefined
+  const hasNextPage = data.length === perPage
+  const nextOffset = (Number.isNaN(offset) ? 0 : offset) + perPage
 
-  return { data: pageRows, nextCursor }
+  return {
+    data,
+    nextCursor: hasNextPage ? String(nextOffset) : undefined
+  }
 }

@@ -93,7 +93,7 @@ function useStore<T>(store: DataGridStore, selector: (state: DataGridState) => T
   return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot)
 }
 
-interface UseDataGridProps<TData> extends Omit<TableOptions<TData>, "pageCount" | "getCoreRowModel"> {
+export interface UseDataGridProps<TData> extends Omit<TableOptions<TData>, "pageCount" | "getCoreRowModel"> {
   onDataChange?: (data: TData[]) => void
   onRowAdd?: (
     event?: React.MouseEvent<HTMLDivElement>
@@ -245,6 +245,18 @@ function useDataGrid<TData>({
   const rowHeight = useStore(store, (state) => state.rowHeight)
   const contextMenu = useStore(store, (state) => state.contextMenu)
   const pasteDialog = useStore(store, (state) => state.pasteDialog)
+
+  useIsomorphicLayoutEffect(() => {
+    if (props.state?.sorting) {
+      store.setState("sorting", props.state.sorting)
+    }
+  }, [props.state?.sorting, store])
+
+  useIsomorphicLayoutEffect(() => {
+    if (props.state?.columnFilters) {
+      store.setState("columnFilters", props.state.columnFilters)
+    }
+  }, [props.state?.columnFilters, store])
 
   const rowHeightValue = getRowHeightValue(rowHeight)
 
@@ -1943,11 +1955,11 @@ function useDataGrid<TData>({
   const tableState = React.useMemo<Partial<TableState>>(
     () => ({
       ...propsRef.current.state,
-      sorting,
-      columnFilters,
+      sorting: props.state?.sorting ?? sorting,
+      columnFilters: props.state?.columnFilters ?? columnFilters,
       rowSelection
     }),
-    [propsRef, sorting, columnFilters, rowSelection]
+    [propsRef, props.state?.sorting, props.state?.columnFilters, sorting, columnFilters, rowSelection]
   )
 
   const tableOptions = React.useMemo<TableOptions<TData>>(() => {
@@ -2943,8 +2955,4 @@ function useDataGrid<TData>({
   )
 }
 
-export {
-  useDataGrid,
-  //
-  type UseDataGridProps
-}
+export { useDataGrid }
