@@ -7,21 +7,13 @@ import {
   buildDrizzleOrderBy,
   buildDrizzleWhere,
   buildKeysetWhere,
-  type DrizzleColumnMap,
   decodeCursor,
-  encodeCursor,
-  type VariantMap
+  encodeCursor
 } from "@/lib/server-grid-filters"
-import type { CellOpts } from "@/types/data-grid"
 
-export type TaskGridParams = {
-  pageParam?: string
-  pageSize?: number
-  sorting?: SortingState
-  filters?: ColumnFiltersState
-}
-
-const COLUMN_MAP: DrizzleColumnMap = {
+// One place that says which columns can be filtered/sorted, what Drizzle column they map to,
+// and how to coerce their values. Point a key at any table's column to filter/sort across joins.
+const COLUMN_MAP = {
   id: tasks.id,
   title: tasks.title,
   description: tasks.description,
@@ -34,25 +26,30 @@ const COLUMN_MAP: DrizzleColumnMap = {
   updatedAt: tasks.updatedAt
 }
 
-const VARIANTS: VariantMap = {
+const VARIANTS = {
   id: "short-text",
-  title: "short-text",
+  title: "text",
   description: "long-text",
-  status: "select",
+  status: "multiSelect",
   label: "short-text",
   priority: "select",
   assignee: "short-text",
   dueDate: "date",
   createdAt: "date",
   updatedAt: "date"
-} satisfies Record<string, CellOpts["variant"]>
+} as const
 
 const DEFAULT_SORT: SortingState = [{ id: "createdAt", desc: true }]
 
+export type TaskGridParams = {
+  pageParam?: string
+  pageSize?: number
+  sorting?: SortingState
+  filters?: ColumnFiltersState
+}
+
 export async function listTasksCursor(params: TaskGridParams = {}) {
   const { pageParam, pageSize = 50, sorting = [], filters = [] } = params
-
-  // console.log("pageParam", JSON.stringify(params, null, 2))
 
   const effectiveSort = sorting.length > 0 ? sorting : DEFAULT_SORT
   const lastDesc = effectiveSort[effectiveSort.length - 1]?.desc ?? true

@@ -40,7 +40,7 @@ function RouteComponent() {
   })
 
   return (
-    <div className="mx-auto p-6">
+    <div className="p-6">
       <h1 className="mb-6 font-bold text-2xl">Tasks Client</h1>
       <DataTableClient
         table={table}

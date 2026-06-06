@@ -31,7 +31,10 @@ export function DataTableServer<TData>({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
-                    className={cn("border-r last:border-r-0", header.column.id === "select" && "!pr-2")}
+                    className={cn(
+                      "h-8 border-r py-1 last:border-r-0",
+                      header.column.id === "select" && "!pr-2"
+                    )}
                     style={{
                       ...getColumnPinningStyle({ column: header.column, withBorder: true, background: "var(--muted)" })
                     }}
@@ -49,12 +52,12 @@ export function DataTableServer<TData>({
                   {table.getVisibleLeafColumns().map((column) => (
                     <TableCell
                       key={column.id}
-                      className={cn("border-r last:border-r-0", column.id === "select" && "!pr-2")}
+                      className={cn("border-r px-2 py-1 last:border-r-0", column.id === "select" && "!pr-2")}
                       style={{
                         ...getColumnPinningStyle({ column, withBorder: true })
                       }}
                     >
-                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-5 w-full" />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -70,7 +73,7 @@ export function DataTableServer<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={cn("border-r last:border-r-0", cell.column.id === "select" && "!pr-2")}
+                      className={cn("border-r px-2 py-1 last:border-r-0", cell.column.id === "select" && "!pr-2")}
                       style={{
                         ...getColumnPinningStyle({ column: cell.column, withBorder: true })
                       }}

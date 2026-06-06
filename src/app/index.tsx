@@ -68,7 +68,7 @@ function TasksPage() {
   })
 
   return (
-    <div className="mx-auto p-6">
+    <div className="p-6">
       <h1 className="mb-6 font-bold text-2xl">Tasks</h1>
       <DataTableServer table={table} isLoading={isPending} onRowClick={(row) => toast.info(`Task: ${row.original.id}`)}>
         <DataTableToolbar table={table} batchActions={<TasksTableBatchActions table={table} />} />
