@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { dataTableSearchSchema } from "@/components/data-table"
 
 const optionalTextSchema = z.string().trim().min(1).optional().catch(undefined)
 
@@ -13,7 +12,9 @@ const statusSchema = z
   .optional()
   .catch(undefined)
 
-export const dataGridSearchSchema = dataTableSearchSchema.pick({ sortBy: true, sortOrder: true }).extend({
+export const dataGridSearchSchema = z.object({
+  sortBy: z.string().optional().catch(undefined),
+  sortOrder: z.enum(["asc", "desc"]).optional().catch(undefined),
   title: optionalTextSchema,
   status: statusSchema,
   priority: z.enum(["low", "medium", "high"]).optional().catch(undefined),

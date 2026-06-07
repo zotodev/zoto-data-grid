@@ -3,11 +3,13 @@
 import type { Column, Table } from "@tanstack/react-table"
 import { X } from "lucide-react"
 import * as React from "react"
-import { DataTableFilterDate, DataTableFilterFaceted, DataTableFilterSlider } from "@/components/data-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback"
 import { cn } from "@/lib/utils"
+import { DataGridFilterDate } from "./data-grid-filter-date"
+import { DataGridFilterFaceted } from "./data-grid-filter-faceted"
+import { DataGridFilterSlider } from "./data-grid-filter-slider"
 
 interface DataGridFilterToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>
@@ -80,12 +82,12 @@ function DataGridToolbarFilter<TData>({ column }: DataGridToolbarFilterProps<TDa
       )
 
     case "range":
-      return <DataTableFilterSlider column={column} title={columnMeta?.label ?? column.id} />
+      return <DataGridFilterSlider column={column} title={columnMeta?.label ?? column.id} />
 
     case "date":
     case "dateRange":
       return (
-        <DataTableFilterDate
+        <DataGridFilterDate
           column={column}
           title={columnMeta?.label ?? column.id}
           multiple={filterMeta.variant === "dateRange"}
@@ -95,7 +97,7 @@ function DataGridToolbarFilter<TData>({ column }: DataGridToolbarFilterProps<TDa
     case "select":
     case "multiSelect":
       return (
-        <DataTableFilterFaceted
+        <DataGridFilterFaceted
           column={column}
           title={columnMeta?.label ?? column.id}
           options={filterMeta.options ?? []}

@@ -166,7 +166,7 @@ export function DataGridSortMenu<TData>({ table, disabled, ...props }: DataGridS
               render={<div role="list" className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1" />}
             >
               {sorting.map((sort) => (
-                <DataTableSortItem
+                <DataGridSortItem
                   key={sort.id}
                   sort={sort}
                   sortItemId={`${id}-sort-${sort.id}`}
@@ -209,7 +209,7 @@ export function DataGridSortMenu<TData>({ table, disabled, ...props }: DataGridS
   )
 }
 
-interface DataTableSortItemProps {
+interface DataGridSortItemProps {
   sort: ColumnSort
   sortItemId: string
   dir: "ltr" | "rtl"
@@ -219,7 +219,7 @@ interface DataTableSortItemProps {
   onSortRemove: (sortId: string) => void
 }
 
-function DataTableSortItem({
+function DataGridSortItem({
   sort,
   sortItemId,
   dir,
@@ -227,7 +227,7 @@ function DataTableSortItem({
   columnLabels,
   onSortUpdate,
   onSortRemove
-}: DataTableSortItemProps) {
+}: DataGridSortItemProps) {
   const fieldListboxId = `${sortItemId}-field-listbox`
   const fieldTriggerId = `${sortItemId}-field-trigger`
   const directionListboxId = `${sortItemId}-direction-listbox`
