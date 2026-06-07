@@ -79,6 +79,8 @@ export function DataGridColumnHeader<TData, TValue>({
           const updated = [...prev];
           updated[existingSortIndex] = newSort;
           return updated;
+        } else if (table.options.enableMultiSort === false) {
+          return [newSort];
         } else {
           return [...prev, newSort];
         }

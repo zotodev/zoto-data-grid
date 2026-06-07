@@ -36,6 +36,7 @@ export function DataGridSortMenu<TData>({ table, disabled, ...props }: DataGridS
 
   const sorting = table.getState().sorting
   const onSortingChange = table.setSorting
+  const isSingleSort = table.options.enableMultiSort === false
 
   const { columnLabels, columns } = React.useMemo(() => {
     const labels = new Map<string, string>()
@@ -63,8 +64,10 @@ export function DataGridSortMenu<TData>({ table, disabled, ...props }: DataGridS
     const firstColumn = columns[0]
     if (!firstColumn) return
 
-    onSortingChange((prevSorting) => [...prevSorting, { id: firstColumn.id, desc: false }])
-  }, [columns, onSortingChange])
+    onSortingChange((prevSorting) =>
+      isSingleSort ? [{ id: firstColumn.id, desc: false }] : [...prevSorting, { id: firstColumn.id, desc: false }]
+    )
+  }, [columns, isSingleSort, onSortingChange])
 
   const onSortUpdate = React.useCallback(
     (sortId: string, updates: Partial<ColumnSort>) => {
@@ -182,7 +185,7 @@ export function DataGridSortMenu<TData>({ table, disabled, ...props }: DataGridS
               className="rounded"
               ref={addButtonRef}
               onClick={onSortAdd}
-              disabled={columns.length === 0}
+              disabled={columns.length === 0 || (isSingleSort && sorting.length > 0)}
             >
               Add sort
             </Button>

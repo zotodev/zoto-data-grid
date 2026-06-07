@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router"
+import type { SortingState } from "@tanstack/react-table"
 import * as React from "react"
 import { DataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterToolbar } from "@/components/data-grid/data-grid-filter-toolbar"
@@ -13,7 +14,6 @@ import { getTasksGridFn } from "@/functions"
 import { useDataGridServer } from "@/hooks/use-data-grid-server"
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useWindowSize } from "@/hooks/use-window-size"
-import { DEFAULT_TASK_GRID_SORTING } from "@/lib/task-grid-params"
 import { ActionsMenu } from "./-components/actions-menu"
 import { getColumns } from "./-components/columns"
 import { dataGridSearchSchema, defaultDataGridSearch } from "./-lib/search"
@@ -27,12 +27,14 @@ export const Route = createFileRoute("/data-grid/")({
 })
 
 const PAGE_SIZE = 50
+const DEFAULT_SORTING: SortingState = [{ id: "createdAt", desc: true }]
 
 function RouteComponent() {
   const search = Route.useSearch()
 
   const queryParams = {
-    sorting: search.sort,
+    sortBy: search.sortBy,
+    sortOrder: search.sortOrder,
     q: search.title,
     status: search.status,
     priority: search.priority,
@@ -76,7 +78,7 @@ function RouteComponent() {
     enablePaste: true,
     readOnly: true,
     initialState: {
-      sorting: DEFAULT_TASK_GRID_SORTING,
+      sorting: DEFAULT_SORTING,
       columnPinning: {
         left: ["select"]
       },

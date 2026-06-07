@@ -1,8 +1,6 @@
-import type { SortingState } from "@tanstack/react-table"
-import { and, asc, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm"
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm"
 import db from "@/db"
 import { tasks } from "@/db/schema"
-import { normalizeTaskGridSorting } from "@/lib/task-grid-params"
 
 const sortableColumns = {
   title: tasks.title,
@@ -19,7 +17,8 @@ const sortableColumns = {
 export type TaskGridParams = {
   cursor?: string
   perPage?: number
-  sorting?: SortingState
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
   q?: string
   status?: string
   priority?: string
@@ -27,10 +26,9 @@ export type TaskGridParams = {
 }
 
 export async function listTasksCursor(params: TaskGridParams = {}) {
-  const { cursor, perPage = 50, q, priority, dueDate } = params
-  const sorting = normalizeTaskGridSorting(params.sorting)
+  const { cursor, perPage = 50, sortBy, sortOrder, q, priority, dueDate } = params
   const status = params.status?.split(",").filter(Boolean)
-  const conditions: SQL[] = []
+  const conditions = []
 
   if (status?.length) {
     conditions.push(status.length === 1 ? eq(tasks.status, status[0]) : inArray(tasks.status, status))
@@ -52,29 +50,30 @@ export async function listTasksCursor(params: TaskGridParams = {}) {
     if (search) conditions.push(search)
   }
 
-  const orderBy = sorting.flatMap((sort) => {
-    const column = sortableColumns[sort.id as keyof typeof sortableColumns]
-    return column ? [sort.desc ? desc(column) : asc(column)] : []
-  })
-
-  const lastSortDescending = sorting[sorting.length - 1]?.desc ?? true
-  orderBy.push(lastSortDescending ? desc(tasks.id) : asc(tasks.id))
+  const orderBy =
+    sortBy && sortBy in sortableColumns
+      ? [
+          sortOrder === "asc"
+            ? asc(sortableColumns[sortBy as keyof typeof sortableColumns])
+            : desc(sortableColumns[sortBy as keyof typeof sortableColumns])
+        ]
+      : [desc(tasks.createdAt)]
 
   const offset = cursor ? Number.parseInt(cursor, 10) : 0
 
-  const data = await db
+  const rows = await db
     .select()
     .from(tasks)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(...orderBy)
-    .limit(perPage)
+    .limit(perPage + 1)
     .offset(Number.isNaN(offset) ? 0 : offset)
 
-  const hasNextPage = data.length === perPage
+  const hasNextPage = rows.length > perPage
   const nextOffset = (Number.isNaN(offset) ? 0 : offset) + perPage
 
   return {
-    data,
+    data: rows.slice(0, perPage),
     nextCursor: hasNextPage ? String(nextOffset) : undefined
   }
 }

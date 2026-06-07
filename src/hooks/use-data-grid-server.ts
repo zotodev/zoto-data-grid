@@ -4,7 +4,8 @@ import * as React from "react"
 import { type UseDataGridProps, useDataGrid } from "@/hooks/use-data-grid"
 
 interface DataGridServerSearch {
-  sort: SortingState
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
   [key: string]: unknown
 }
 
@@ -19,8 +20,19 @@ interface UseDataGridServerProps<TData>
 
 export function useDataGridServer<TData>({ search, columns, initialState, ...props }: UseDataGridServerProps<TData>) {
   const navigate = useNavigate()
+  const sorting = React.useMemo<SortingState>(
+    () => (search.sortBy ? [{ id: search.sortBy, desc: search.sortOrder === "desc" }] : (initialState?.sorting ?? [])),
+    [initialState?.sorting, search.sortBy, search.sortOrder]
+  )
 
   const filterableColumns = React.useMemo(() => columns.filter((column) => column.enableColumnFilter), [columns])
+  const filterSearchKey = filterableColumns
+    .map((column) => {
+      const id = column.id ?? ("accessorKey" in column ? String(column.accessorKey) : "")
+      return [id, search[id]]
+    })
+    .map(([id, value]) => `${id}:${JSON.stringify(value)}`)
+    .join("|")
 
   const columnFilters = React.useMemo<ColumnFiltersState>(() => {
     const filters: ColumnFiltersState = []
@@ -40,21 +52,23 @@ export function useDataGridServer<TData>({ search, columns, initialState, ...pro
     }
 
     return filters
-  }, [filterableColumns, search])
+  }, [filterableColumns, filterSearchKey])
 
   const onSortingChange = React.useCallback(
     (updater: Updater<SortingState>) => {
-      const sorting = typeof updater === "function" ? updater(search.sort) : updater
+      const nextSorting = typeof updater === "function" ? updater(sorting) : updater
+      const firstSort = nextSorting[0]
 
       navigate({
         to: ".",
         search: (previous: Record<string, unknown>) => ({
           ...previous,
-          sort: sorting.length > 0 ? sorting : initialState?.sorting
+          sortBy: firstSort?.id,
+          sortOrder: firstSort ? (firstSort.desc ? ("desc" as const) : ("asc" as const)) : undefined
         })
       })
     },
-    [initialState?.sorting, navigate, search.sort]
+    [navigate, sorting]
   )
 
   const onColumnFiltersChange = React.useCallback(
@@ -93,13 +107,14 @@ export function useDataGridServer<TData>({ search, columns, initialState, ...pro
     columns,
     initialState,
     state: {
-      sorting: search.sort,
+      sorting,
       columnFilters
     },
     onSortingChange,
     onColumnFiltersChange,
     manualSorting: true,
     manualFiltering: true,
-    manualPagination: true
+    manualPagination: true,
+    enableMultiSort: false
   })
 }
