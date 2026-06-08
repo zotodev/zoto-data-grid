@@ -39,7 +39,13 @@ export async function listTasksCursor(params: TaskGridParams = {}) {
   }
 
   if (dueDate !== undefined) {
-    conditions.push(eq(tasks.dueDate, new Date(dueDate)))
+    const filterDate = new Date(dueDate)
+    const dayStartSec = Math.floor(
+      new Date(filterDate.getFullYear(), filterDate.getMonth(), filterDate.getDate()).getTime() / 1000
+    )
+    const dayEndSec = dayStartSec + 86_400
+
+    conditions.push(sql`${tasks.dueDate} >= ${dayStartSec} AND ${tasks.dueDate} < ${dayEndSec}`)
   }
 
   if (q) {

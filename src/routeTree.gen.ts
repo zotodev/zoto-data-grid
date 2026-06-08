@@ -13,6 +13,7 @@ import { Route as PosRouteImport } from "./app/pos"
 import { Route as IndexRouteImport } from "./app/index"
 import { Route as DataTableClientIndexRouteImport } from "./app/data-table-client/index"
 import { Route as DataGridIndexRouteImport } from "./app/data-grid/index"
+import { Route as DataGridTableIndexRouteImport } from "./app/data-grid-table/index"
 
 const PosRoute = PosRouteImport.update({
   id: "/pos",
@@ -34,16 +35,23 @@ const DataGridIndexRoute = DataGridIndexRouteImport.update({
   path: "/data-grid/",
   getParentRoute: () => rootRouteImport,
 } as any)
+const DataGridTableIndexRoute = DataGridTableIndexRouteImport.update({
+  id: "/data-grid-table/",
+  path: "/data-grid-table/",
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/pos": typeof PosRoute
+  "/data-grid-table/": typeof DataGridTableIndexRoute
   "/data-grid/": typeof DataGridIndexRoute
   "/data-table-client/": typeof DataTableClientIndexRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/pos": typeof PosRoute
+  "/data-grid-table": typeof DataGridTableIndexRoute
   "/data-grid": typeof DataGridIndexRoute
   "/data-table-client": typeof DataTableClientIndexRoute
 }
@@ -51,20 +59,33 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/": typeof IndexRoute
   "/pos": typeof PosRoute
+  "/data-grid-table/": typeof DataGridTableIndexRoute
   "/data-grid/": typeof DataGridIndexRoute
   "/data-table-client/": typeof DataTableClientIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/pos" | "/data-grid/" | "/data-table-client/"
+  fullPaths:
+    | "/"
+    | "/pos"
+    | "/data-grid-table/"
+    | "/data-grid/"
+    | "/data-table-client/"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/pos" | "/data-grid" | "/data-table-client"
-  id: "__root__" | "/" | "/pos" | "/data-grid/" | "/data-table-client/"
+  to: "/" | "/pos" | "/data-grid-table" | "/data-grid" | "/data-table-client"
+  id:
+    | "__root__"
+    | "/"
+    | "/pos"
+    | "/data-grid-table/"
+    | "/data-grid/"
+    | "/data-table-client/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PosRoute: typeof PosRoute
+  DataGridTableIndexRoute: typeof DataGridTableIndexRoute
   DataGridIndexRoute: typeof DataGridIndexRoute
   DataTableClientIndexRoute: typeof DataTableClientIndexRoute
 }
@@ -99,12 +120,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DataGridIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/data-grid-table/": {
+      id: "/data-grid-table/"
+      path: "/data-grid-table"
+      fullPath: "/data-grid-table/"
+      preLoaderRoute: typeof DataGridTableIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PosRoute: PosRoute,
+  DataGridTableIndexRoute: DataGridTableIndexRoute,
   DataGridIndexRoute: DataGridIndexRoute,
   DataTableClientIndexRoute: DataTableClientIndexRoute,
 }
