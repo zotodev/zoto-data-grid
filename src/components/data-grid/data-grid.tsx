@@ -186,43 +186,51 @@ export function DataGrid<TData>({
           }
         >
           {isLoading
-            ? table.getHeaderGroups().slice(0, 1).flatMap((headerGroup) =>
-                Array.from({ length: 20 }).map((_, rowIdx) => (
-                  <div
-                    key={rowIdx}
-                    role="row"
-                    tabIndex={-1}
-                    className="flex w-full border-b"
-                    style={{ height: 34, transform: `translateY(${rowIdx * 34}px)`, position: "absolute", width: "100%" }}
-                  >
-                    {headerGroup.headers.map((header, colIdx) => {
-                      const isLast = colIdx === headerGroup.headers.length - 1
-                      const isCheckbox = header.column.id === "select"
-                      return (
-                        <div
-                          key={header.id}
-                          role="gridcell"
-                          tabIndex={-1}
-                          className={cn("flex shrink-0 items-center px-3", !isLast && "border-e")}
-                          style={{
-                            ...getColumnPinningStyle({ column: header.column, dir, background: "var(--background)" }),
-                            width: `calc(var(--header-${header.id}-size) * 1px)`
-                          }}
-                        >
-                          {isCheckbox ? (
-                            <Skeleton className="h-3.5 w-3.5 rounded-sm" />
-                          ) : (
-                            <Skeleton
-                              className="h-3.5 rounded"
-                              style={{ width: `${55 + ((rowIdx * 13 + colIdx * 7) % 35)}%` }}
-                            />
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))
-              )
+            ? table
+                .getHeaderGroups()
+                .slice(0, 1)
+                .flatMap((headerGroup) =>
+                  Array.from({ length: 20 }).map((_, rowIdx) => (
+                    <div
+                      key={rowIdx}
+                      role="row"
+                      tabIndex={-1}
+                      className="flex w-full border-b"
+                      style={{
+                        height: 34,
+                        transform: `translateY(${rowIdx * 34}px)`,
+                        position: "absolute",
+                        width: "100%"
+                      }}
+                    >
+                      {headerGroup.headers.map((header, colIdx) => {
+                        const isLast = colIdx === headerGroup.headers.length - 1
+                        const isCheckbox = header.column.id === "select"
+                        return (
+                          <div
+                            key={header.id}
+                            role="gridcell"
+                            tabIndex={-1}
+                            className={cn("flex shrink-0 items-center px-3", !isLast && "border-e")}
+                            style={{
+                              ...getColumnPinningStyle({ column: header.column, dir, background: "var(--background)" }),
+                              width: `calc(var(--header-${header.id}-size) * 1px)`
+                            }}
+                          >
+                            {isCheckbox ? (
+                              <Skeleton className="h-3.5 w-3.5 rounded-sm" />
+                            ) : (
+                              <Skeleton
+                                className="h-3.5 rounded"
+                                style={{ width: `${55 + ((rowIdx * 13 + colIdx * 7) % 35)}%` }}
+                              />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))
+                )
             : virtualItems.map((virtualItem) => {
                 const row = rows[virtualItem.index]
                 if (!row) return null

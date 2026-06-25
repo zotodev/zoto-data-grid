@@ -1,6 +1,6 @@
-import type * as React from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import type * as React from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 interface DivProps extends React.ComponentProps<"div"> {}
 
@@ -10,16 +10,16 @@ function DataGridSkeleton({ className, ...props }: DivProps) {
       data-slot="grid-skeleton"
       className={cn(
         "flex h-[calc(100dvh-(--spacing(16)))] w-full flex-col gap-4 has-[>[data-slot=grid-skeleton-toolbar]]:h-[calc(100dvh-(--spacing(20)))]",
-        className,
+        className
       )}
       {...props}
     />
-  );
+  )
 }
 
 interface DataGridSkeletonToolbarProps extends DivProps {
-  align?: "start" | "center" | "end";
-  actionCount?: number;
+  align?: "start" | "center" | "end"
+  actionCount?: number
 }
 
 function DataGridSkeletonToolbar({
@@ -36,9 +36,9 @@ function DataGridSkeletonToolbar({
         {
           "justify-start": align === "start",
           "justify-center": align === "center",
-          "justify-end": align === "end",
+          "justify-end": align === "end"
         },
-        className,
+        className
       )}
       {...props}
     >
@@ -46,17 +46,11 @@ function DataGridSkeletonToolbar({
         <Skeleton key={i} className="h-7 w-20 shrink-0" />
       ))}
     </div>
-  );
+  )
 }
 
 function DataGridSkeletonGrid({ className, ...props }: DivProps) {
-  return (
-    <Skeleton
-      data-slot="grid-skeleton-grid"
-      className={cn("flex-1", className)}
-      {...props}
-    />
-  );
+  return <Skeleton data-slot="grid-skeleton-grid" className={cn("flex-1", className)} {...props} />
 }
 
-export { DataGridSkeleton, DataGridSkeletonGrid, DataGridSkeletonToolbar };
+export { DataGridSkeleton, DataGridSkeletonGrid, DataGridSkeletonToolbar }

@@ -1,45 +1,39 @@
-"use client";
+"use client"
 
-import { ChevronDown, ChevronUp, X } from "lucide-react";
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useAsRef } from "@/hooks/use-as-ref";
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import type { SearchState } from "@/types/data-grid";
+import { ChevronDown, ChevronUp, X } from "lucide-react"
+import * as React from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useAsRef } from "@/hooks/use-as-ref"
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback"
+import type { SearchState } from "@/types/data-grid"
 
 interface DataGridSearchProps extends SearchState {}
 
 export const DataGridSearch = React.memo(DataGridSearchImpl, (prev, next) => {
-  if (prev.searchOpen !== next.searchOpen) return false;
+  if (prev.searchOpen !== next.searchOpen) return false
 
-  if (!next.searchOpen) return true;
+  if (!next.searchOpen) return true
 
-  if (
-    prev.searchQuery !== next.searchQuery ||
-    prev.matchIndex !== next.matchIndex
-  ) {
-    return false;
+  if (prev.searchQuery !== next.searchQuery || prev.matchIndex !== next.matchIndex) {
+    return false
   }
 
-  if (prev.searchMatches.length !== next.searchMatches.length) return false;
+  if (prev.searchMatches.length !== next.searchMatches.length) return false
 
   for (let i = 0; i < prev.searchMatches.length; i++) {
-    const prevMatch = prev.searchMatches[i];
-    const nextMatch = next.searchMatches[i];
+    const prevMatch = prev.searchMatches[i]
+    const nextMatch = next.searchMatches[i]
 
-    if (!prevMatch || !nextMatch) return false;
+    if (!prevMatch || !nextMatch) return false
 
-    if (
-      prevMatch.rowIndex !== nextMatch.rowIndex ||
-      prevMatch.columnId !== nextMatch.columnId
-    ) {
-      return false;
+    if (prevMatch.rowIndex !== nextMatch.rowIndex || prevMatch.columnId !== nextMatch.columnId) {
+      return false
     }
   }
 
-  return true;
-});
+  return true
+})
 
 function DataGridSearchImpl({
   searchMatches,
@@ -50,117 +44,112 @@ function DataGridSearchImpl({
   onSearchQueryChange,
   onSearch,
   onNavigateToNextMatch,
-  onNavigateToPrevMatch,
+  onNavigateToPrevMatch
 }: DataGridSearchProps) {
   const propsRef = useAsRef({
     onSearchOpenChange,
     onSearchQueryChange,
     onSearch,
     onNavigateToNextMatch,
-    onNavigateToPrevMatch,
-  });
+    onNavigateToPrevMatch
+  })
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     if (searchOpen) {
       requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
+        inputRef.current?.focus()
+      })
     }
-  }, [searchOpen]);
+  }, [searchOpen])
 
   React.useEffect(() => {
-    if (!searchOpen) return;
+    if (!searchOpen) return
 
     function onEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        event.preventDefault();
-        propsRef.current.onSearchOpenChange(false);
+        event.preventDefault()
+        propsRef.current.onSearchOpenChange(false)
       }
     }
 
-    document.addEventListener("keydown", onEscape);
-    return () => document.removeEventListener("keydown", onEscape);
-  }, [searchOpen, propsRef]);
+    document.addEventListener("keydown", onEscape)
+    return () => document.removeEventListener("keydown", onEscape)
+  }, [searchOpen, propsRef])
 
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent) => {
-      event.stopPropagation();
+      event.stopPropagation()
 
       if (event.key === "Enter") {
-        event.preventDefault();
+        event.preventDefault()
         if (event.shiftKey) {
-          propsRef.current.onNavigateToPrevMatch();
+          propsRef.current.onNavigateToPrevMatch()
         } else {
-          propsRef.current.onNavigateToNextMatch();
+          propsRef.current.onNavigateToNextMatch()
         }
       }
     },
-    [propsRef],
-  );
+    [propsRef]
+  )
 
   const debouncedSearch = useDebouncedCallback((query: string) => {
-    propsRef.current.onSearch(query);
-  }, 150);
+    propsRef.current.onSearch(query)
+  }, 150)
 
   const onChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      propsRef.current.onSearchQueryChange(value);
-      debouncedSearch(value);
+      const value = event.target.value
+      propsRef.current.onSearchQueryChange(value)
+      debouncedSearch(value)
     },
-    [propsRef, debouncedSearch],
-  );
+    [propsRef, debouncedSearch]
+  )
 
-  const onTriggerPointerDown = React.useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      // prevent implicit pointer capture
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
-      if (target.hasPointerCapture(event.pointerId)) {
-        target.releasePointerCapture(event.pointerId);
-      }
+  const onTriggerPointerDown = React.useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    // prevent implicit pointer capture
+    const target = event.target
+    if (!(target instanceof HTMLElement)) return
+    if (target.hasPointerCapture(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId)
+    }
 
-      // Only prevent default if we're not clicking on the input
-      // This allows text selection in the input while still preventing focus stealing elsewhere
-      if (
-        event.button === 0 &&
-        event.ctrlKey === false &&
-        event.pointerType === "mouse" &&
-        !(event.target instanceof HTMLInputElement)
-      ) {
-        event.preventDefault();
-      }
-    },
-    [],
-  );
+    // Only prevent default if we're not clicking on the input
+    // This allows text selection in the input while still preventing focus stealing elsewhere
+    if (
+      event.button === 0 &&
+      event.ctrlKey === false &&
+      event.pointerType === "mouse" &&
+      !(event.target instanceof HTMLInputElement)
+    ) {
+      event.preventDefault()
+    }
+  }, [])
 
   const onPrevMatchPointerDown = React.useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) =>
-      onTriggerPointerDown(event),
-    [onTriggerPointerDown],
-  );
+    (event: React.PointerEvent<HTMLButtonElement>) => onTriggerPointerDown(event),
+    [onTriggerPointerDown]
+  )
 
   const onNextMatchPointerDown = React.useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) =>
-      onTriggerPointerDown(event),
-    [onTriggerPointerDown],
-  );
+    (event: React.PointerEvent<HTMLButtonElement>) => onTriggerPointerDown(event),
+    [onTriggerPointerDown]
+  )
 
   const onClose = React.useCallback(() => {
-    propsRef.current.onSearchOpenChange(false);
-  }, [propsRef]);
+    propsRef.current.onSearchOpenChange(false)
+  }, [propsRef])
 
   const onPrevMatch = React.useCallback(() => {
-    propsRef.current.onNavigateToPrevMatch();
-  }, [propsRef]);
+    propsRef.current.onNavigateToPrevMatch()
+  }, [propsRef])
 
   const onNextMatch = React.useCallback(() => {
-    propsRef.current.onNavigateToNextMatch();
-  }, [propsRef]);
+    propsRef.current.onNavigateToNextMatch()
+  }, [propsRef])
 
-  if (!searchOpen) return null;
+  if (!searchOpen) return null
 
   return (
     <div
@@ -204,13 +193,7 @@ function DataGridSearchImpl({
           >
             <ChevronDown />
           </Button>
-          <Button
-            aria-label="Close search"
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            onClick={onClose}
-          >
+          <Button aria-label="Close search" variant="ghost" size="icon" className="size-7" onClick={onClose}>
             <X />
           </Button>
         </div>
@@ -227,5 +210,5 @@ function DataGridSearchImpl({
         )}
       </div>
     </div>
-  );
+  )
 }

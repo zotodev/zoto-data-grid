@@ -3,7 +3,7 @@ import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import type { TaskGridQueryParams } from "../-lib/task-query-state"
+import type { TaskGridQueryParams } from "../../-lib/data-grid/task-query-state"
 
 interface QueryParamsDebugProps {
   queryParams: TaskGridQueryParams

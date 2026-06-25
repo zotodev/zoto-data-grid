@@ -44,14 +44,11 @@ export function ActionsMenu({ table }: ActionsMenuProps) {
   }
 
   const onProcess = async () => {
-    await toast.promise(
-      new Promise<void>((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Processing ${selectedCount} item${selectedCount > 1 ? "s" : ""}...`,
-        success: `Processed ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
-        error: "Failed to process items"
-      }
-    )
+    await toast.promise(new Promise<void>((resolve) => setTimeout(resolve, 1500)), {
+      loading: `Processing ${selectedCount} item${selectedCount > 1 ? "s" : ""}...`,
+      success: `Processed ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
+      error: "Failed to process items"
+    })
 
     await queryClient.invalidateQueries({ queryKey: ["data-grid-tasks"] })
     table.resetRowSelection()

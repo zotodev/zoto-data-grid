@@ -1,33 +1,30 @@
-"use client";
+"use client"
 
-import type { TableMeta } from "@tanstack/react-table";
-import * as React from "react";
-import { Button } from "@/components/ui/button";
+import type { TableMeta } from "@tanstack/react-table"
+import * as React from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useAsRef } from "@/hooks/use-as-ref";
-import { cn } from "@/lib/utils";
-import type { PasteDialogState } from "@/types/data-grid";
+  DialogTitle
+} from "@/components/ui/dialog"
+import { useAsRef } from "@/hooks/use-as-ref"
+import { cn } from "@/lib/utils"
+import type { PasteDialogState } from "@/types/data-grid"
 
 interface DataGridPasteDialogProps<TData> {
-  tableMeta: TableMeta<TData>;
-  pasteDialog: PasteDialogState;
+  tableMeta: TableMeta<TData>
+  pasteDialog: PasteDialogState
 }
 
-export function DataGridPasteDialog<TData>({
-  tableMeta,
-  pasteDialog,
-}: DataGridPasteDialogProps<TData>) {
-  const onPasteDialogOpenChange = tableMeta?.onPasteDialogOpenChange;
-  const onCellsPaste = tableMeta?.onCellsPaste;
+export function DataGridPasteDialog<TData>({ tableMeta, pasteDialog }: DataGridPasteDialogProps<TData>) {
+  const onPasteDialogOpenChange = tableMeta?.onPasteDialogOpenChange
+  const onCellsPaste = tableMeta?.onCellsPaste
 
-  if (!pasteDialog.open) return null;
+  if (!pasteDialog.open) return null
 
   return (
     <PasteDialog
@@ -35,7 +32,7 @@ export function DataGridPasteDialog<TData>({
       onPasteDialogOpenChange={onPasteDialogOpenChange}
       onCellsPaste={onCellsPaste}
     />
-  );
+  )
 }
 
 interface PasteDialogProps
@@ -43,39 +40,35 @@ interface PasteDialogProps
     Required<Pick<TableMeta<unknown>, "pasteDialog">> {}
 
 const PasteDialog = React.memo(PasteDialogImpl, (prev, next) => {
-  if (prev.pasteDialog.open !== next.pasteDialog.open) return false;
-  if (!next.pasteDialog.open) return true;
-  if (prev.pasteDialog.rowsNeeded !== next.pasteDialog.rowsNeeded) return false;
+  if (prev.pasteDialog.open !== next.pasteDialog.open) return false
+  if (!next.pasteDialog.open) return true
+  if (prev.pasteDialog.rowsNeeded !== next.pasteDialog.rowsNeeded) return false
 
-  return true;
-});
+  return true
+})
 
-function PasteDialogImpl({
-  pasteDialog,
-  onPasteDialogOpenChange,
-  onCellsPaste,
-}: PasteDialogProps) {
+function PasteDialogImpl({ pasteDialog, onPasteDialogOpenChange, onCellsPaste }: PasteDialogProps) {
   const propsRef = useAsRef({
     onPasteDialogOpenChange,
-    onCellsPaste,
-  });
+    onCellsPaste
+  })
 
-  const expandRadioRef = React.useRef<HTMLInputElement | null>(null);
+  const expandRadioRef = React.useRef<HTMLInputElement | null>(null)
 
   const onOpenChange = React.useCallback(
     (open: boolean) => {
-      propsRef.current.onPasteDialogOpenChange?.(open);
+      propsRef.current.onPasteDialogOpenChange?.(open)
     },
-    [propsRef],
-  );
+    [propsRef]
+  )
 
   const onCancel = React.useCallback(() => {
-    propsRef.current.onPasteDialogOpenChange?.(false);
-  }, [propsRef]);
+    propsRef.current.onPasteDialogOpenChange?.(false)
+  }, [propsRef])
 
   const onContinue = React.useCallback(() => {
-    propsRef.current.onCellsPaste?.(expandRadioRef.current?.checked ?? false);
-  }, [propsRef]);
+    propsRef.current.onCellsPaste?.(expandRadioRef.current?.checked ?? false)
+  }, [propsRef])
 
   return (
     <Dialog open={pasteDialog.open} onOpenChange={onOpenChange}>
@@ -84,38 +77,25 @@ function PasteDialogImpl({
           <DialogTitle>Do you want to add more rows?</DialogTitle>
           <DialogDescription>
             We need <strong>{pasteDialog.rowsNeeded}</strong> additional row
-            {pasteDialog.rowsNeeded !== 1 ? "s" : ""} to paste everything from
-            your clipboard.
+            {pasteDialog.rowsNeeded !== 1 ? "s" : ""} to paste everything from your clipboard.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 py-1">
           <label className="flex cursor-pointer items-start gap-3">
-            <RadioItem
-              ref={expandRadioRef}
-              name="expand-option"
-              value="expand"
-              defaultChecked
-            />
+            <RadioItem ref={expandRadioRef} name="expand-option" value="expand" defaultChecked />
             <div className="flex flex-col gap-1">
-              <span className="font-medium text-sm leading-none">
-                Create new rows
-              </span>
+              <span className="font-medium text-sm leading-none">Create new rows</span>
               <span className="text-muted-foreground text-sm">
                 Add {pasteDialog.rowsNeeded} new row
-                {pasteDialog.rowsNeeded !== 1 ? "s" : ""} to the table and paste
-                all data
+                {pasteDialog.rowsNeeded !== 1 ? "s" : ""} to the table and paste all data
               </span>
             </div>
           </label>
           <label className="flex cursor-pointer items-start gap-3">
             <RadioItem name="expand-option" value="no-expand" />
             <div className="flex flex-col gap-1">
-              <span className="font-medium text-sm leading-none">
-                Keep current rows
-              </span>
-              <span className="text-muted-foreground text-sm">
-                Paste only what fits in the existing rows
-              </span>
+              <span className="font-medium text-sm leading-none">Keep current rows</span>
+              <span className="text-muted-foreground text-sm">Paste only what fits in the existing rows</span>
             </div>
           </label>
         </div>
@@ -127,7 +107,7 @@ function PasteDialogImpl({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function RadioItem({ className, ...props }: React.ComponentProps<"input">) {
@@ -138,11 +118,11 @@ function RadioItem({ className, ...props }: React.ComponentProps<"input">) {
         "relative size-4 shrink-0 appearance-none rounded-full border border-input bg-background shadow-xs outline-none transition-[color,box-shadow]",
         "text-primary focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "checked:before:absolute checked:before:start-1/2 checked:before:top-1/2 checked:before:size-2 checked:before:-translate-x-1/2 checked:before:-translate-y-1/2 checked:before:rounded-full checked:before:bg-primary checked:before:content-['']",
+        "checked:before:-translate-x-1/2 checked:before:-translate-y-1/2 checked:before:absolute checked:before:start-1/2 checked:before:top-1/2 checked:before:size-2 checked:before:rounded-full checked:before:bg-primary checked:before:content-['']",
         "dark:bg-input/30",
-        className,
+        className
       )}
       {...props}
     />
-  );
+  )
 }

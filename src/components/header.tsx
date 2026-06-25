@@ -1,103 +1,19 @@
-import { Link, useLocation } from "@tanstack/react-router"
-import { Menu } from "lucide-react"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Link } from "@tanstack/react-router"
+import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import ThemeToggle from "./theme-toggle"
 
-type NavItem = {
-  label: string
-  path: string
-  match: "exact" | "startsWith"
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: "Data Table", path: "/", match: "exact" },
-  { label: "Data Table Client", path: "/data-table-client", match: "startsWith" },
-  { label: "Data Grid", path: "/data-grid", match: "exact" },
-  { label: "DataGridTable", path: "/data-grid-table", match: "startsWith" },
-  { label: "POS", path: "/pos", match: "startsWith" }
-]
-
 export default function Header() {
-  const { pathname } = useLocation()
-
-  const isActive = (item: NavItem) => (item.match === "exact" ? pathname === item.path : pathname.startsWith(item.path))
-
   return (
     <nav className="sticky top-0 z-50 flex w-full flex-col border-border border-b bg-sidebar">
-      {/* ── Row 1: Logo + Nav tabs (desktop) + User menu ── */}
       <div className="flex h-12 w-full items-center justify-between">
-        {/* Left side: Logo + nav tabs */}
         <div className="flex h-full items-center">
-          <Link
-            to={NAV_ITEMS[0].path}
-            className="flex h-full shrink-0 items-center gap-2 border-border border-r px-4 text-foreground"
-          >
+          <Link to="/" className="flex h-full shrink-0 items-center gap-2 border-border border-r px-4 text-foreground">
             <img src="/table.ico" alt="Logo" className="h-5 w-5" />
+            <span className="font-medium text-sm">Data Grid</span>
           </Link>
-
-          {/* Mobile nav popover */}
-          <Popover>
-            <PopoverTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2 h-9 w-9 rounded-md border md:hidden"
-                  aria-label="Toggle navigation menu"
-                />
-              }
-            >
-              <Menu className="h-4 w-4" />
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-44 p-1 md:hidden">
-              <ul className="flex flex-col">
-                {NAV_ITEMS.map((item) => {
-                  const active = isActive(item)
-                  return (
-                    <li key={`mobile-${item.path}`}>
-                      <Link
-                        to={item.path}
-                        className={cn(
-                          "block rounded-sm px-3 py-2 text-sm transition-colors",
-                          active
-                            ? "bg-accent font-medium text-foreground"
-                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </PopoverContent>
-          </Popover>
-
-          {/* Desktop nav tabs */}
-          <ul className="hidden h-full items-center md:flex">
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item)
-              return (
-                <li key={item.path} className="h-full">
-                  <Link
-                    to={item.path}
-                    className={cn(
-                      "relative flex h-full items-center px-5 text-sm transition-colors",
-                      active ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {item.label}
-                    {active && <span className="absolute bottom-0 left-0 h-0.5 w-full bg-foreground" />}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
         </div>
 
-        {/* Right side: Theme toggle + GitHub */}
         <div className="flex items-center gap-2 px-4">
           <ThemeToggle />
 
@@ -117,7 +33,7 @@ export default function Header() {
               </g>
             </svg>
 
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">GitHub repository</span>
           </a>
         </div>
       </div>
