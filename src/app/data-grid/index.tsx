@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router"
-import type { SortingState } from "@tanstack/react-table"
+import { createFileRoute } from "@tanstack/react-router"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 import * as React from "react"
 import { DataGrid } from "@/components/data-grid/data-grid"
 import { arrIncludesSome, dateFilter } from "@/components/data-grid/data-grid-filter-functions"
@@ -16,30 +16,19 @@ import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { ActionsMenu } from "./-components/actions-menu"
 import { getColumns } from "./-components/columns"
-import { dataGridSearchSchema, defaultDataGridSearch } from "./-lib/search"
+import { QueryParamsDebug } from "./-components/query-params-debug"
+import { DEFAULT_SORTING, getTaskGridQueryParams } from "./-lib/task-query-state"
 
 export const Route = createFileRoute("/data-grid/")({
-  validateSearch: dataGridSearchSchema,
-  search: {
-    middlewares: [stripSearchParams(defaultDataGridSearch)]
-  },
   component: RouteComponent
 })
 
 const PAGE_SIZE = 50
-const DEFAULT_SORTING: SortingState = [{ id: "createdAt", desc: true }]
 
 function RouteComponent() {
-  const search = Route.useSearch()
-
-  const queryParams = {
-    sortBy: search.sortBy,
-    sortOrder: search.sortOrder,
-    q: search.title,
-    status: search.status,
-    priority: search.priority,
-    dueDate: search.dueDate
-  }
+  const [sorting, setSorting] = React.useState<SortingState>(DEFAULT_SORTING)
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const queryParams = React.useMemo(() => getTaskGridQueryParams(sorting, columnFilters), [sorting, columnFilters])
 
   // Track viewport size; 760 is the SSR/fallback height before the window is measured.
   const windowSize = useWindowSize({ defaultHeight: 760 })
@@ -69,7 +58,12 @@ function RouteComponent() {
   const grid = useDataGridServer<Task>({
     data: allData,
     columns,
-    search,
+    state: {
+      sorting,
+      columnFilters
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     filterFns: {
       arrIncludesSome,
       dateFilter
@@ -116,6 +110,7 @@ function RouteComponent() {
         <div className="ml-auto flex items-center gap-2">
           <ActionsMenu table={grid.table} />
           {(isLoading || isFetchingNextPage) && <Spinner className="size-3.5 text-muted-foreground" />}
+          <QueryParamsDebug queryParams={queryParams} />
           <DataGridSortMenu table={grid.table} />
           <DataGridViewMenu table={grid.table} />
           <DataGridKeyboardShortcuts enableSearch enablePaste />
