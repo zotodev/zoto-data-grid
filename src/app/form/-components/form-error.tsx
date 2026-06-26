@@ -77,7 +77,7 @@ export function FormError({
 
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-start justify-between gap-2">
-          {title && <p className="text-sm font-medium">{title}</p>}
+          {title && <p className="font-medium text-sm">{title}</p>}
           {onDismiss && (
             <Button
               type="button"
@@ -92,11 +92,11 @@ export function FormError({
           )}
         </div>
 
-        <div className="text-sm text-destructive/90">{children ?? getErrorMessage(error)}</div>
+        <div className="text-destructive/90 text-sm">{children ?? getErrorMessage(error)}</div>
 
         {showRawError && (
-          <details className="mt-1.5 group/raw">
-            <summary className="cursor-pointer list-none text-destructive/70 text-xs select-none hover:text-destructive">
+          <details className="group/raw mt-1.5">
+            <summary className="cursor-pointer select-none list-none text-destructive/70 text-xs hover:text-destructive">
               <span className="group-open/raw:hidden">Show raw error</span>
               <span className="hidden group-open/raw:inline">Hide raw error</span>
             </summary>
