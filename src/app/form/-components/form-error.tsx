@@ -20,24 +20,35 @@ export function getErrorMessage(error: unknown): string {
   return "Something went wrong. Please try again."
 }
 
+/** Serializes the raw error (stack / JSON / string) for dev-only debugging. */
+export function getRawError(error: unknown): string {
+  if (error instanceof Error) return error.stack ?? `${error.name}: ${error.message}`
+  if (typeof error === "string") return error
+  try {
+    return JSON.stringify(error, null, 2)
+  } catch {
+    return String(error)
+  }
+}
+
 interface FormErrorProps extends Omit<React.ComponentProps<"div">, "children" | "title"> {
   /** Raw error from any React Query hook (e.g. `mutation.error`), or any thrown value. */
   error: unknown
   /** Headline above the message. */
   title?: React.ReactNode
   /**
-   * Override the rendered body. Pass this when your server returns a well-defined
-   * error and you've already shaped it (in the hook / `mutationFn`); otherwise the
-   * message is derived from `error` automatically.
+   * Override the rendered body. Pass this when you've already shaped a proper
+   * message (in the hook / `mutationFn`); otherwise it's derived from `error`.
    */
   children?: React.ReactNode
+  /** Whether to show the raw error for debugging. Defaults to dev only. */
+  showRawError?: boolean
   /** When provided, shows a dismiss button. */
   onDismiss?: () => void
 }
 
 /**
  * Generic alert for surfacing submission errors on any form.
- * Drop it anywhere and feed it the error from your query/mutation:
  *
  *   <FormError error={mutation.error} onDismiss={() => mutation.reset()} />
  */
@@ -45,6 +56,7 @@ export function FormError({
   error,
   title = "Something went wrong",
   children,
+  showRawError = import.meta.env.DEV,
   onDismiss,
   className,
   ...props
@@ -65,7 +77,7 @@ export function FormError({
 
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-start justify-between gap-2">
-          {title && <p className="font-medium text-sm">{title}</p>}
+          {title && <p className="text-sm font-medium">{title}</p>}
           {onDismiss && (
             <Button
               type="button"
@@ -80,7 +92,19 @@ export function FormError({
           )}
         </div>
 
-        <div className="text-destructive/90 text-sm">{children ?? getErrorMessage(error)}</div>
+        <div className="text-sm text-destructive/90">{children ?? getErrorMessage(error)}</div>
+
+        {showRawError && (
+          <details className="mt-1.5 group/raw">
+            <summary className="cursor-pointer list-none text-destructive/70 text-xs select-none hover:text-destructive">
+              <span className="group-open/raw:hidden">Show raw error</span>
+              <span className="hidden group-open/raw:inline">Hide raw error</span>
+            </summary>
+            <pre className="mt-1.5 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-destructive/10 p-2 font-mono text-[11px] text-destructive/70">
+              {getRawError(error)}
+            </pre>
+          </details>
+        )}
       </div>
     </div>
   )

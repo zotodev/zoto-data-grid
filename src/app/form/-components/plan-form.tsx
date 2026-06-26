@@ -8,8 +8,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { submitPlanFn } from "../-functions"
+import { divide } from "../-lib/external"
 import { PLANS, planFormSchema, type PlanFormData } from "../-lib/schema"
 import { FormError } from "./form-error"
+
+type Action = "submit" | "divide" | "defined"
 
 export function PlanForm() {
   const {
@@ -22,18 +25,36 @@ export function PlanForm() {
     defaultValues: { plan: "" },
   })
 
-  // Plain React Query mutation — nothing custom. `mutation.error` is fed straight to <FormError />.
+  // One mutation, three error sources — all surfaced through the same <FormError />.
   const mutation = useMutation({
-    mutationFn: (data: PlanFormData) => submitPlanFn({ data }),
+    mutationFn: async ({ action, data }: { action: Action; data?: PlanFormData }) => {
+      switch (action) {
+        // 1. Server source: the server function throws (plain Error from the backend).
+        case "submit":
+          return submitPlanFn({ data: data! })
+
+        // 2. External source: third-party code throws a raw runtime error.
+        case "divide": {
+          const result = divide(10, 0)
+          return { ok: true as const, plan: `result: ${result}` }
+        }
+
+        // 3. Defined source: an error we shape right here with a proper message.
+        case "defined":
+          throw new Error("Could not process your request. Please try again.")
+      }
+    },
     onSuccess: () => reset(),
   })
+
+  const pendingAction = mutation.isPending ? mutation.variables?.action : undefined
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Activate a workspace plan</CardTitle>
-          <CardDescription>POC showing a reusable, generic server-error component.</CardDescription>
+          <CardDescription>POC: one generic error component, three different error sources.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -43,12 +64,12 @@ export function PlanForm() {
             <div className="flex items-center gap-2 rounded-lg border border-foreground/10 bg-muted px-3 py-2 text-sm">
               <CheckCircle2Icon className="size-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
               <span>
-                <span className="font-medium capitalize">{mutation.data?.plan}</span> plan activated.
+                <span className="font-medium capitalize">{mutation.data?.plan}</span> activated.
               </span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit((data) => mutation.mutate({ action: "submit", data }))} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="plan">Plan</Label>
               <Controller
@@ -80,9 +101,36 @@ export function PlanForm() {
               )}
             </div>
 
+            {/* 1. Server error source */}
             <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending}>
-              {mutation.isPending && <Spinner className="mr-1" />}
-              {mutation.isPending ? "Activating…" : "Activate plan"}
+              {pendingAction === "submit" && <Spinner className="mr-1" />}
+              {pendingAction === "submit" ? "Activating…" : "Activate plan (server error)"}
+            </Button>
+
+            {/* 2. External runtime error source */}
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              disabled={mutation.isPending}
+              onClick={() => mutation.mutate({ action: "divide" })}
+            >
+              {pendingAction === "divide" && <Spinner className="mr-1" />}
+              Divide by zero (external error)
+            </Button>
+
+            {/* 3. Error defined in the mutation */}
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              disabled={mutation.isPending}
+              onClick={() => mutation.mutate({ action: "defined" })}
+            >
+              {pendingAction === "defined" && <Spinner className="mr-1" />}
+              Throw defined error
             </Button>
           </form>
         </CardContent>
