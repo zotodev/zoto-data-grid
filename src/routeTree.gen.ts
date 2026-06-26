@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from "./app/__root"
 import { Route as IndexRouteImport } from "./app/index"
+import { Route as FormIndexRouteImport } from "./app/form/index"
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormIndexRoute = FormIndexRouteImport.update({
+  id: "/form/",
+  path: "/form/",
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
+  "/form/": typeof FormIndexRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
+  "/form": typeof FormIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/": typeof IndexRoute
+  "/form/": typeof FormIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/"
+  fullPaths: "/" | "/form/"
   fileRoutesByTo: FileRoutesByTo
-  to: "/"
-  id: "__root__" | "/"
+  to: "/" | "/form"
+  id: "__root__" | "/" | "/form/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FormIndexRoute: typeof FormIndexRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -48,11 +58,19 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/form/": {
+      id: "/form/"
+      path: "/form"
+      fullPath: "/form/"
+      preLoaderRoute: typeof FormIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FormIndexRoute: FormIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
